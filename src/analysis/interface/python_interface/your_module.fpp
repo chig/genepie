@@ -76,12 +76,12 @@ module your_module
     type(c_ptr) :: molecule_mass ! c_double[num_molecules]
     type(c_ptr) :: molecule_name ! c_char[num_molecules][10]
     ! ref coord
-    type(c_ptr) :: atom_refcoord ! c_double[][3]
+    type(c_ptr) :: atom_refcoord ! c_double[num_atoms][3]
     ! fit coord
-    type(c_ptr) :: atom_fitcoord ! c_double[][3]
+    type(c_ptr) :: atom_fitcoord ! c_double[num_atoms][3]
     ! principal component mode
     integer(c_int) :: num_pc_modes
-    type(c_ptr) :: pc_mode ! c_double[]
+    type(c_ptr) :: pc_mode ! c_double[num_pc_modes]
     ! ! FEP
     integer(c_int)           :: fep_topology
     integer(c_int)           :: num_hbonds_singleA
@@ -92,18 +92,28 @@ module your_module
     type(c_ptr)              :: num_dihedrals_fep ! c_int[5]
     type(c_ptr)              :: num_impropers_fep ! c_int[5]
     type(c_ptr)              :: num_cmaps_fep     ! c_int[5]
-    type(c_ptr) :: bond_list_fep ! c_int[][][]
-    type(c_ptr) :: angl_list_fep ! c_int[][][]
-    type(c_ptr) :: dihe_list_fep ! c_int[][][]
-    type(c_ptr) :: impr_list_fep ! c_int[][][]
-    type(c_ptr) :: cmap_list_fep ! c_int[][][]
-    type(c_ptr) :: id_singleA ! c_int[]
-    type(c_ptr) :: id_singleB ! c_int[]
-    type(c_ptr) :: fepgrp ! c_int[]
+    type(c_ptr) :: bond_list_fep ! c_int[5][nbnd_fep_max][2]
+    type(c_ptr) :: angl_list_fep ! c_int[5][nangl_fep_max][3]
+    type(c_ptr) :: dihe_list_fep ! c_int[5][ndihe_fep_max][4]
+    type(c_ptr) :: impr_list_fep ! c_int[5][nimpr_fep_max][4]
+    type(c_ptr) :: cmap_list_fep ! c_int[5][ncmap_fep_max][8]
+    type(c_ptr) :: id_singleA ! c_int[size_id_singleA]
+    type(c_ptr) :: id_singleB ! c_int[size_id_singleB]
+    type(c_ptr) :: fepgrp ! c_int[size_fepgrp]
     type(c_ptr) :: fepgrp_bond ! c_int[5][5]
     type(c_ptr) :: fepgrp_angl ! c_int[5][5][5]
     type(c_ptr) :: fepgrp_dihe ! c_int[5][5][5][5]
     type(c_ptr) :: fepgrp_cmap ! c_int[5*5*5*5*5*5*5*5]
+
+    ! for deallocate data
+    integer :: nbnd_fep_max
+    integer :: nangl_fep_max
+    integer :: ndihe_fep_max
+    integer :: nimpr_fep_max
+    integer :: ncmap_fep_max
+    integer :: size_id_singleA
+    integer :: size_id_singleB
+    integer :: size_fepgrp
   end type s_molecule_c
 
 contains
@@ -197,7 +207,7 @@ contains
     c_dst%stokes_radius     = f2c_double_array_allocatable(f_src%stokes_radius)
     c_dst%inv_stokes_radius = f2c_double_array_allocatable(f_src%inv_stokes_radius)
 
-    c_dst%chain_id = f2c_string_array_allocatable(f_src%chain_id )
+    c_dst%chain_id = f2c_string_array_allocatable(f_src%chain_id)
     c_dst%atom_coord = f2c_double_array_2dim_allocatable(f_src%atom_coord)
     c_dst%atom_occupancy = f2c_double_array_allocatable(f_src%atom_occupancy)
     c_dst%atom_temp_factor = f2c_double_array_allocatable(f_src%atom_temp_factor)
@@ -232,15 +242,54 @@ contains
     c_dst%num_impropers_fep = f2c_int_array(f_src%num_impropers_fep)
     c_dst%num_cmaps_fep     = f2c_int_array(f_src%num_cmaps_fep)
 
-    c_dst%bond_list_fep = f2c_int_array_3dim_allocatable(f_src%bond_list_fep)
-    c_dst%angl_list_fep = f2c_int_array_3dim_allocatable(f_src%angl_list_fep)
-    c_dst%dihe_list_fep = f2c_int_array_3dim_allocatable(f_src%dihe_list_fep)
-    c_dst%impr_list_fep = f2c_int_array_3dim_allocatable(f_src%impr_list_fep)
-    c_dst%cmap_list_fep = f2c_int_array_3dim_allocatable(f_src%cmap_list_fep)
-
-    c_dst%id_singleA  = f2c_int_array_allocatable(f_src%id_singleA)
-    c_dst%id_singleB  = f2c_int_array_allocatable(f_src%id_singleB)
-    c_dst%fepgrp      = f2c_int_array_allocatable(f_src%fepgrp)
+    if (allocated(f_src%bond_list_fep)) then
+      c_dst%bond_list_fep = f2c_int_array_3dim(f_src%bond_list_fep)
+      c_dst%nbnd_fep_max = size(f_src%bond_list_fep, dim=2)
+    else
+      c_dst%nbnd_fep_max = 0
+    end if
+    if (allocated(f_src%angl_list_fep)) then
+      c_dst%angl_list_fep = f2c_int_array_3dim(f_src%angl_list_fep)
+      c_dst%nangl_fep_max = size(f_src%angl_list_fep, dim=2)
+    else
+      c_dst%nangl_fep_max = 0
+    end if
+    if (allocated(f_src%dihe_list_fep)) then
+      c_dst%dihe_list_fep= f2c_int_array_3dim(f_src%dihe_list_fep)
+      c_dst%ndihe_fep_max = size(f_src%dihe_list_fep, dim=2)
+    else
+      c_dst%ndihe_fep_max = 0
+    end if
+    if (allocated(f_src%impr_list_fep)) then
+      c_dst%impr_list_fep = f2c_int_array_3dim(f_src%impr_list_fep)
+      c_dst%nimpr_fep_max = size(f_src%impr_list_fep, dim=2)
+    else
+      c_dst%nimpr_fep_max = 0
+    end if
+    if (allocated(f_src%cmap_list_fep)) then
+      c_dst%cmap_list_fep = f2c_int_array_3dim(f_src%cmap_list_fep)
+      c_dst%ncmap_fep_max = size(f_src%cmap_list_fep, dim=2)
+    else
+      c_dst%ncmap_fep_max = 0
+    end if
+    if (allocated(f_src%id_singleA)) then
+      c_dst%id_singleA  = f2c_int_array(f_src%id_singleA)
+      c_dst%size_id_singleA = size(f_src%id_singleA)
+    else
+      c_dst%size_id_singleA = 0
+    end if
+    if (allocated(f_src%id_singleB)) then
+      c_dst%id_singleB  = f2c_int_array(f_src%id_singleB)
+      c_dst%size_id_singleB = size(f_src%id_singleB)
+    else
+      c_dst%size_id_singleB = 0
+    end if
+    if (allocated(f_src%fepgrp)) then
+      c_dst%fepgrp      = f2c_int_array(f_src%fepgrp)
+      c_dst%size_fepgrp = size(f_src%fepgrp)
+    else
+      c_dst%size_fepgrp = 0
+    end if
     c_dst%fepgrp_bond = f2c_int_array_2dim(f_src%fepgrp_bond)
     c_dst%fepgrp_angl = f2c_int_array_3dim(f_src%fepgrp_angl)
     c_dst%fepgrp_dihe = f2c_int_array_4dim(f_src%fepgrp_dihe)
@@ -255,8 +304,11 @@ contains
     character(kind=c_char), pointer :: work_string(:,:)
     integer(c_int), pointer :: work_int(:)
     integer(c_int), pointer :: work_int2(:,:)
+    integer(c_int), pointer :: work_int3(:,:,:)
+    integer(c_int), pointer :: work_int4(:,:,:,:)
     real(c_double), pointer :: work_double(:)
     real(c_double), pointer :: work_double2(:,:)
+    logical(c_bool), pointer :: work_bool(:)
 
     if (c_associated(self%atom_no)) then
       call C_F_pointer(self%atom_no, work_int, [self%num_atoms])
@@ -318,46 +370,158 @@ contains
       call C_F_pointer(self%inv_stokes_radius, work_double, [self%num_atoms])
       deallocate(work_double)
     end if
-    ! TODO
-
-  !   deallocate(self%chain_id)
-  !   deallocate(self%atom_coord)
-  !   deallocate(self%atom_occupancy)
-  !   deallocate(self%atom_temp_factor)
-  !   deallocate(self%atom_velocity)
-  !   deallocate(self%light_atom_name)
-  !   deallocate(self%light_atom_mass)
-  !   deallocate(self%molecule_no)
-  !   deallocate(self%bond_list)
-  !   deallocate(self%enm_list)
-  !   deallocate(self%angl_list)
-  !   deallocate(self%dihe_list)
-  !   deallocate(self%impr_list)
-  !   deallocate(self%cmap_list)
-  !   deallocate(self%molecule_atom_no)
-  !   deallocate(self%molecule_mass)
-  !   deallocate(self%molecule_name)
-  !   deallocate(self%atom_refcoord)
-  !   deallocate(self%atom_fitcoord)
-  !   deallocate(self%pc_mode)
-  !   deallocate(self%num_atoms_fep)
-  !   deallocate(self%num_bonds_fep)
-  !   deallocate(self%num_angles_fep)
-  !   deallocate(self%num_dihedrals_fep)
-  !   deallocate(self%num_impropers_fep)
-  !   deallocate(self%num_cmaps_fep)
-  !   deallocate(self%bond_list_fep)
-  !   deallocate(self%angl_list_fep)
-  !   deallocate(self%dihe_list_fep)
-  !   deallocate(self%impr_list_fep)
-  !   deallocate(self%cmap_list_fep)
-  !   deallocate(self%id_singleA)
-  !   deallocate(self%id_singleB)
-  !   deallocate(self%fepgrp)
-  !   deallocate(self%fepgrp_bond)
-  !   deallocate(self%fepgrp_angl)
-  !   deallocate(self%fepgrp_dihe)
-  !   deallocate(self%fepgrp_cmap)
+    if (c_associated(self%chain_id)) then
+      call C_F_pointer(self%chain_id, work_string, [1, self%num_atoms])
+      deallocate(work_string)
+    end if
+    if (c_associated(self%atom_coord)) then
+      call C_F_pointer(self%atom_coord, work_double2, [3, self%num_atoms])
+      deallocate(work_double2)
+    end if
+    if (c_associated(self%atom_occupancy)) then
+      call C_F_pointer(self%atom_occupancy, work_double, [self%num_atoms])
+      deallocate(work_double)
+    end if
+    if (c_associated(self%atom_temp_factor)) then
+      call C_F_pointer(self%atom_temp_factor, work_double, [self%num_atoms])
+      deallocate(work_double)
+    end if
+    if (c_associated(self%atom_velocity)) then
+      call C_F_pointer(self%atom_velocity, work_double2, [3, self%num_atoms])
+      deallocate(work_double2)
+    end if
+    if (c_associated(self%light_atom_name)) then
+      call C_F_pointer(self%light_atom_name, work_bool, [self%num_atoms])
+      deallocate(work_bool)
+    end if
+    if (c_associated(self%light_atom_mass)) then
+      call C_F_pointer(self%light_atom_mass, work_bool, [self%num_atoms])
+      deallocate(work_bool)
+    end if
+    if (c_associated(self%molecule_no)) then
+      call C_F_pointer(self%molecule_no, work_int, [self%num_atoms])
+      deallocate(work_int)
+    end if
+    if (c_associated(self%bond_list)) then
+      call C_F_pointer(self%bond_list, work_int2, [2, self%num_bonds])
+      deallocate(work_int2)
+    end if
+    if (c_associated(self%enm_list)) then
+      call C_F_pointer(self%enm_list, work_int2, [2, self%num_enm_bonds])
+      deallocate(work_int2)
+    end if
+    if (c_associated(self%angl_list)) then
+      call C_F_pointer(self%angl_list, work_int2, [3, self%num_angles])
+      deallocate(work_int2)
+    end if
+    if (c_associated(self%dihe_list)) then
+      call C_F_pointer(self%dihe_list, work_int2, [4, self%num_dihedrals])
+      deallocate(work_int2)
+    end if
+    if (c_associated(self%impr_list)) then
+      call C_F_pointer(self%impr_list, work_int2, [4, self%num_impropers])
+      deallocate(work_int2)
+    end if
+    if (c_associated(self%cmap_list)) then
+      call C_F_pointer(self%cmap_list, work_int2, [8, self%num_cmaps])
+      deallocate(work_int2)
+    end if
+    if (c_associated(self%molecule_atom_no)) then
+      call C_F_pointer(self%molecule_atom_no, work_int, [self%num_molecules])
+      deallocate(work_int)
+    end if
+    if (c_associated(self%molecule_mass)) then
+      call C_F_pointer(self%molecule_mass, work_double, [self%num_molecules])
+      deallocate(work_double)
+    end if
+    if (c_associated(self%molecule_name)) then
+      call C_F_pointer(self%molecule_name, work_string, [10, self%num_molecules])
+      deallocate(work_string)
+    end if
+    if (c_associated(self%atom_refcoord)) then
+      call C_F_pointer(self%atom_refcoord, work_double2, [3, self%num_atoms])
+      deallocate(work_double2)
+    end if
+    if (c_associated(self%atom_fitcoord)) then
+      call C_F_pointer(self%atom_fitcoord, work_double2, [3, self%num_atoms])
+      deallocate(work_double2)
+    end if
+    if (c_associated(self%pc_mode)) then
+      call C_F_pointer(self%pc_mode, work_double, [self%num_pc_modes])
+      deallocate(work_double)
+    end if
+    if (c_associated(self%num_atoms_fep)) then
+      call C_F_pointer(self%num_atoms_fep, work_int, [5])
+      deallocate(work_int)
+    end if
+    if (c_associated(self%num_bonds_fep)) then
+      call C_F_pointer(self%num_bonds_fep, work_int, [5])
+      deallocate(work_int)
+    end if
+    if (c_associated(self%num_angles_fep)) then
+      call C_F_pointer(self%num_angles_fep, work_int, [5])
+      deallocate(work_int)
+    end if
+    if (c_associated(self%num_dihedrals_fep)) then
+      call C_F_pointer(self%num_dihedrals_fep, work_int, [5])
+      deallocate(work_int)
+    end if
+    if (c_associated(self%num_impropers_fep)) then
+      call C_F_pointer(self%num_impropers_fep, work_int, [5])
+      deallocate(work_int)
+    end if
+    if (c_associated(self%num_cmaps_fep)) then
+      call C_F_pointer(self%num_cmaps_fep, work_int, [5])
+      deallocate(work_int)
+    end if
+    if (c_associated(self%bond_list_fep)) then
+      call C_F_pointer(self%bond_list_fep, work_int3, [2, self%nbnd_fep_max, 5])
+      deallocate(work_int3)
+    end if
+    if (c_associated(self%angl_list_fep)) then
+      call C_F_pointer(self%angl_list_fep, work_int3, [3, self%nangl_fep_max, 5])
+      deallocate(work_int3)
+    end if
+    if (c_associated(self%dihe_list_fep)) then
+      call C_F_pointer(self%dihe_list_fep, work_int3, [4, self%ndihe_fep_max, 5])
+      deallocate(work_int3)
+    end if
+    if (c_associated(self%impr_list_fep)) then
+      call C_F_pointer(self%impr_list_fep, work_int3, [4, self%nimpr_fep_max, 5])
+      deallocate(work_int3)
+    end if
+    if (c_associated(self%cmap_list_fep)) then
+      call C_F_pointer(self%cmap_list_fep, work_int3, [8, self%ncmap_fep_max, 5])
+      deallocate(work_int3)
+    end if
+    if (c_associated(self%id_singleA)) then
+      call C_F_pointer(self%id_singleA, work_int, [self%size_id_singleA])
+      deallocate(work_int)
+    end if
+    if (c_associated(self%id_singleB)) then
+      call C_F_pointer(self%id_singleB, work_int, [self%size_id_singleB])
+      deallocate(work_int)
+    end if
+    if (c_associated(self%fepgrp)) then
+      call C_F_pointer(self%fepgrp, work_int, [self%size_fepgrp])
+      deallocate(work_int)
+    end if
+    if (c_associated(self%fepgrp_bond)) then
+      call C_F_pointer(self%fepgrp_bond, work_int2, [5, 5])
+      deallocate(work_int2)
+    end if
+    if (c_associated(self%fepgrp_angl)) then
+      call C_F_pointer(self%fepgrp_angl, work_int3, [5, 5, 5])
+      deallocate(work_int3)
+    end if
+    if (c_associated(self%fepgrp_dihe)) then
+      call C_F_pointer(self%fepgrp_dihe, work_int4, [5, 5, 5, 5])
+      deallocate(work_int4)
+    end if
+    if (c_associated(self%fepgrp_cmap)) then
+      call C_F_pointer(self%fepgrp_cmap, work_int, [5*5*5*5*5*5*5*5])
+      deallocate(work_int)
+    end if
   end subroutine deallocate_s_molecule_c
 
 end module your_module
