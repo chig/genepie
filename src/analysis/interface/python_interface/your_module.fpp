@@ -9,16 +9,16 @@ module your_module
   implicit none
 
   private
-  public :: define_molecule_from_pdb
+  public :: test_main
 
   ! Define MaxFilename if it"s not available from constants_mod
   integer, parameter :: MaxFilename = 256  ! Adjust this value as needed
 
 contains
 
-  subroutine define_molecule_from_pdb( &
+  subroutine test_main( &
       pdb_filename, out_mol, num_atoms, atom_names, atom_coords) &
-      bind(C, name="define_molecule_from_pdb")
+      bind(C, name="test_main")
     use conv_f_c_util
     implicit none
     ! Input parameters
@@ -61,7 +61,7 @@ contains
     atom_coords = c_loc(temp_atom_coords)
 
     call f2c_s_molecule(molecule, out_mol)
-  end subroutine define_molecule_from_pdb
+  end subroutine test_main
 
   subroutine test_conv_c2f(c_mol &
       ) &
