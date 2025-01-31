@@ -2,6 +2,7 @@ import ctypes
 import os
 import threading
 from s_molecule_c import SMoleculeC
+from s_trajectories_c import STrajectoriesC
 
 class LibGenesis:
     """singleton
@@ -29,6 +30,12 @@ class LibGenesis:
                 ctypes.POINTER(SMoleculeC)]
         self.lib.define_molecule_from_pdb.restype = None
 
+        self.lib.define_molecule_from_pdb_psf.argtypes = [
+                ctypes.c_char_p,
+                ctypes.c_char_p,
+                ctypes.POINTER(SMoleculeC)]
+        self.lib.define_molecule_from_pdb_psf.restype = None
+
         self.lib.deallocate_s_molecule_c.argtypes = [
                 ctypes.POINTER(SMoleculeC)]
         self.lib.deallocate_s_molecule_c.restype = None
@@ -40,3 +47,11 @@ class LibGenesis:
         self.lib.test_conv_c2f.argtypes = [
                 ctypes.POINTER(SMoleculeC)]
         self.lib.test_conv_c2f.restype = None
+
+        self.lib.crd_convert_c.argtypes = [
+                ctypes.POINTER(SMoleculeC),
+                ctypes.c_char_p,
+                ctypes.c_char_p,
+                ctypes.POINTER(STrajectoriesC),
+                ]
+        self.lib.crd_convert_c.restype = None

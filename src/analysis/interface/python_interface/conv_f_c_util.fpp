@@ -10,6 +10,7 @@ module conv_f_c_util
   private
 
   public :: c2f_string
+  public :: c2f_string_allocate
   public :: f2c_bool_array
   public :: f2c_int_array
   public :: f2c_string_array
@@ -46,6 +47,50 @@ contains
       f_string(i:i) = c_string(i)
     end do
   end subroutine c2f_string
+
+  subroutine c2f_string_allocate(c_string, f_string, limit_len)
+    use, intrinsic :: iso_c_binding
+    implicit none
+    character(kind=c_char), intent(in) :: c_string(*)
+    character(:), intent(inout), allocatable :: f_string
+    integer, intent(in), optional :: limit_len
+    integer :: i
+    integer :: len_str
+    integer :: limit
+
+    len_str = max(len_c_str(c_string, limit), 1) ! Use a space instead of an empty string
+    if (allocated(f_string)) then
+      if (len(f_string) < len_str) then
+        deallocate(f_string)
+        allocate(character(len_str) :: f_string)
+      end if
+    else
+      allocate(character(len_str) :: f_string)
+    end if
+    call c2f_string(c_string, f_string)
+  end subroutine c2f_string_allocate
+
+  integer function len_c_str(c_string, limit_len) result(len_str)
+    use, intrinsic :: iso_c_binding
+    implicit none
+    character(kind=c_char), intent(in) :: c_string(*)
+    integer, intent(in), optional :: limit_len
+    integer :: limit
+    integer :: i
+
+    if (.not. present(limit_len)) then
+      limit = limit_len
+    else
+      limit = 10000000
+    end if
+    len_str = 0
+    do i = 1, limit
+      if (c_string(i) == c_null_char) then
+        len_str = max(i - 1, 1)
+        exit
+      end if
+    end do
+  end function len_c_str
 
   !======1=========2=========3=========4=========5=========6=========7=========8
   !
@@ -390,7 +435,7 @@ contains
     call C_F_pointer(c_src, buf, [len(f_dst(0)), size])
     do i = 1, size
       do j = 1, len(f_dst(0))
-        f_dst(i)(j:j) = buf(i,j)
+        f_dst(i)(j:j) = buf(j,i)
       end do
     end do
   end subroutine c2f_string_array

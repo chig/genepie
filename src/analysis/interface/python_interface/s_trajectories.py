@@ -1,14 +1,8 @@
 import ctypes
 from typing import Self
 import numpy as np
+from s_trajectories_c import STrajectoriesC
 from libgenesis import LibGenesis
-
-
-class STrajectoriesC(ctypes.Structure):
-     _fields_ = [("coords", ctypes.c_ptr),
-                 ("pbc_boxes", ctypes.c_ptr),
-                 ("nframe", ctypes.c_int),
-                 ("natom", ctypes.c_int)]
 
 
 class STrajectories:

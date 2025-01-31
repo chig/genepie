@@ -13,6 +13,7 @@ module s_trajectories_c_mod
   end type s_trajectories_c
 
   public :: get_frame
+  public :: set_frame
   public :: init_empty_s_trajectories_c
   public :: deallocate_s_trajectories_c
 
@@ -72,5 +73,18 @@ contains
     call C_F_POINTER(trajs_fort%pbc_boxes, boxes, [3, 3, trajs_fort%nframe])
     traj_fort%pbc_box = boxes(:, :, frame_idx)
     traj_fort%coord = coords(:, :, frame_idx)
+  end subroutine
+
+  subroutine set_frame(out_traj, src_traj, frame_idx)
+    type(s_trajectories_c), intent(inout) :: out_traj
+    type(s_trajectory), intent(in) :: src_traj
+    integer, intent(in) :: frame_idx
+
+    real(C_double), pointer :: coords(:,:,:), boxes(:,:,:)
+
+    call C_F_POINTER(out_traj%coords, coords, [3, out_traj%natom, out_traj%nframe])
+    call C_F_POINTER(out_traj%pbc_boxes, boxes, [3, 3, out_traj%nframe])
+    coords(:, :, frame_idx) = src_traj%coord
+    boxes(:, :, frame_idx) = src_traj%pbc_box
   end subroutine
 end module s_trajectories_c_mod

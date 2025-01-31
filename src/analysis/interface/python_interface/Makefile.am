@@ -6,7 +6,8 @@ libpython_interface_la_SOURCES = \
         s_molecule_c_mod.fpp \
         define_molecule.fpp \
         s_trajectories_c_mod.fpp \
-        crd_convert_main.fpp
+        crd_convert_convert.fpp \
+        crd_convert_c_mod.fpp
 
 EXTRA_DIST = \
 	Makefile.depends
@@ -20,8 +21,9 @@ AM_FCFLAGS = -fPIC
 libpython_interface_la_LDFLAGS = -module -avoid-version -export-dynamic -shared -no-undefined
 libpython_interface_la_LDFLAGS += -Wl,-undefined,dynamic_lookup
 libpython_interface_la_LDFLAGS += $(shell mpif90 --showme:link)
-libpython_interface_la_LIBADD = -llapack -lblas ../../libana/libana.a ../../../lib/lib.a ../../../ \
-								../../converter/crd_convert/libcrd_convert.a -lgfortran -lmpi -lmpi_mpifh
+libpython_interface_la_LIBADD = ../../converter/crd_convert/libcrd_convert.a \
+								../../libana/libana.a ../../../lib/lib.a ../../../ \
+								-llapack -lblas -lgfortran -lmpi -lmpi_mpifh
 libpython_interface_la_FCFLAGS = $(FCFLAGS) $(PYTHON_CPPFLAGS)
 
 # Add these lines
