@@ -1,3 +1,7 @@
+SUBDIRS := ../../libana \
+		   ../../converter/crd_convert \
+		   ../../trj_analysis/trj_analysis .
+
 lib_LTLIBRARIES = libpython_interface.la
 
 libpython_interface_la_SOURCES = \
@@ -7,7 +11,8 @@ libpython_interface_la_SOURCES = \
         define_molecule.fpp \
         s_trajectories_c_mod.fpp \
         crd_convert_convert.fpp \
-        crd_convert_c_mod.fpp
+        crd_convert_c_mod.fpp \
+        trj_analysis_c_mod.fpp
 
 EXTRA_DIST = \
 	Makefile.depends
@@ -21,9 +26,11 @@ AM_FCFLAGS = -fPIC
 libpython_interface_la_LDFLAGS = -module -avoid-version -export-dynamic -shared -no-undefined
 libpython_interface_la_LDFLAGS += -Wl,-undefined,dynamic_lookup
 libpython_interface_la_LDFLAGS += $(shell mpif90 --showme:link)
-libpython_interface_la_LIBADD = ../../converter/crd_convert/libcrd_convert.a \
-								../../libana/libana.a ../../../lib/lib.a ../../../ \
-								-llapack -lblas -lgfortran -lmpi -lmpi_mpifh
+libpython_interface_la_LIBADD = \
+		../../converter/crd_convert/libcrd_convert.a \
+		../../trj_analysis/trj_analysis/libtrj_analysis.a \
+		../../libana/libana.a ../../../lib/lib.a ../../../ \
+		-llapack -lblas -lgfortran -lmpi -lmpi_mpifh
 libpython_interface_la_FCFLAGS = $(FCFLAGS) $(PYTHON_CPPFLAGS)
 
 # Add these lines
@@ -40,11 +47,17 @@ if USEKCOMP
 	$(FPP) $(PPFLAGS) $(DEFS) $*.f90
 	mv $*.cpp.f90 $*.f90
 	$(LIBTOOL) --tag=FC --mode=compile $(FC) $(DEFAULT_INCLUDES) $(INCLUDES) \
-		-I../../../lib -I../../libana -I../../converter/crd_convert $(libpython_interface_la_FCFLAGS) -c $*.f90
+		-I../../../lib -I../../libana \
+		-I../../converter/crd_convert \
+		-I ../../trj_analysis/trj_analysis \
+		$(libpython_interface_la_FCFLAGS) -c $*.f90
 else
 	$(FPP) $(PPFLAGS) $(DEFS) $< $*.f90
 	$(LIBTOOL) --tag=FC --mode=compile $(FC) $(DEFAULT_INCLUDES) $(INCLUDES) \
-		-I../../../lib -I../../libana -I../../converter/crd_convert $(libpython_interface_la_FCFLAGS) -c $*.f90
+		-I../../../lib -I../../libana \
+		-I../../converter/crd_convert \
+		-I ../../trj_analysis/trj_analysis \
+		$(libpython_interface_la_FCFLAGS) -c $*.f90
 endif
 
 depend: clean_depend
