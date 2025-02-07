@@ -37,9 +37,9 @@ contains
     use conv_f_c_util
     implicit none
     type(s_molecule_c), intent(in) :: molecule
-    character(kind=c_char), intent(in) :: ctrl_path(*)
     type(c_ptr), intent(in) :: s_trajes_c_array
     integer(c_int), intent(in) :: num_trajs
+    character(kind=c_char), intent(in) :: ctrl_path(*)
     type(c_ptr), intent(out) :: result_distance
     integer(c_int), intent(out) :: num_distance
     integer(c_int), intent(out) :: num
@@ -88,7 +88,7 @@ contains
     call control(ctrl_filename, ctrl_data)
 
 
-    ! [Step2] Set relevant variables and structures 
+    ! [Step2] Set relevant variables and structures
     !
     write(MsgOut,'(A)') '[STEP2] Set Relevant Variables and Structures'
     write(MsgOut,'(A)') ' '

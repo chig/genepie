@@ -6,7 +6,7 @@ module s_trajectories_c_mod
 
   ! multi frame s_trajectory
   type, public, bind(C) :: s_trajectories_c
-    type(c_ptr) :: coords      ! doubles[nframe][natom][3]
+    type(c_ptr) :: coords      ! double[nframe][natom][3]
     type(c_ptr) :: pbc_boxes   ! double[nframe][3][3]
     integer(c_int) :: nframe
     integer(c_int) :: natom

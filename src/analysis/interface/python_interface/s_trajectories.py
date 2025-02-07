@@ -44,7 +44,7 @@ class STrajectories:
 class STrajectoriesArray:
     def __init__(self, traj_c_array: ctypes.c_void_p, len_array: int):
         if traj_c_array:
-            self._src_c_obj = traj_c_array
+            self.src_c_obj = traj_c_array
             self.traj_c_array = []
             traj_p = ctypes.cast(traj_c_array, ctypes.POINTER(STrajectoriesC))
             for i in range(0, len_array):
@@ -60,7 +60,7 @@ class STrajectoriesArray:
         """deallocate resources"""
         len_array = ctypes.c_int(len(self.traj_c_array))
         LibGenesis().lib.deallocate_s_trajectories_c_array(
-                ctypes.byref(self._src_c_obj),
+                ctypes.byref(self.src_c_obj),
                 ctypes.byref(len_array))
 
     def get_array(self):
