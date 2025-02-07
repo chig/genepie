@@ -1,6 +1,17 @@
 SUBDIRS := ../../libana \
 		   ../../converter/crd_convert \
-		   ../../trj_analysis/trj_analysis .
+		   ../../trj_analysis/trj_analysis \
+		   ../../trj_analysis/diffusion_analysis \
+		   ../../trj_analysis/drms_analysis \
+		   ../../trj_analysis/hb_analysis \
+		   ../../trj_analysis/msd_analysis \
+		   ../../trj_analysis/rg_analysis \
+		   ../../trj_analysis/rmsd_analysis \
+		   ../../clustering/kmeans_clustering \
+		   ../../free_energy/mbar_analysis \
+		   ../../free_energy/wham_analysis \
+		   ../../mode_analysis/avecrd_analysis \
+		   .
 
 lib_LTLIBRARIES = libpython_interface.la
 
