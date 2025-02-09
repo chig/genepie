@@ -61,7 +61,7 @@ contains
 
     ! local variables
     type(s_trajectory) :: trajectory
-    integer                   :: nstru, ifile, istep, num_trjfiles
+    integer                   :: nstru, istep, num_trjfiles
     integer                   :: i, iatom, rg_out, idx
     real(wp)                  :: com(3), weight, tot_weight, rg
 
@@ -82,7 +82,7 @@ contains
     !
     nstru = 0
 
-    do ifile = 1, trajes_c%nframe
+    do istep = 1, trajes_c%nframe
 
       ! read trajectory
       !   coordinates of one MD snapshot are saved in trajectory%coord)
