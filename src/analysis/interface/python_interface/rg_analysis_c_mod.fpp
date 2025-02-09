@@ -48,7 +48,6 @@ contains
 
     call c2f_string_allocate(ctrl_path, fort_ctrl_path)
     call c2f_s_molecule(molecule, f_molecule)
-    write(0, *) "@@@", ana_period, fort_ctrl_path
     call rg_analysis_main( &
         f_molecule, s_trajes_c, ana_period, fort_ctrl_path, rg)
     result_rg = c_loc(rg)

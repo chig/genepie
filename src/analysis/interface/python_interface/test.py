@@ -100,19 +100,28 @@ def test_trj_analysis():
 
 def rg_analysis(molecule: SMolecule, trajs :STrajectoriesC,
                 ana_period: int,
-                ctrl_path: str | bytes | os.PathLike):
+                ctrl_path: str | bytes | os.PathLike
+                ) -> npt.NDArray[np.float64]:
     mol_c = py2c_s_molecule(molecule)
 
     ana_period_c = ctypes.c_int(ana_period)
-    result_rg = ctypes.c_void_p(None)
+    result_rg_c = ctypes.c_void_p(None)
 
     LibGenesis().lib.rg_analysis_c(
             ctypes.byref(mol_c),
-            trajs,
+            ctypes.byref(trajs),
             ctypes.byref(ana_period_c),
             py2c_util.pathlike_to_byte(ctrl_path),
-            ctypes.byref(result_rg),
+            ctypes.byref(result_rg_c),
             )
+
+    n_frame_c = ctypes.c_int(int(trajs.nframe / ana_period))
+    result_rg = c2py_util.conv_double_ndarray(
+            result_rg_c, n_frame_c.value)
+    LibGenesis().lib.deallocate_double(
+            ctypes.byref(result_rg_c),
+            ctypes.byref(n_frame_c))
+    return result_rg
 
 
 def test_rg_analysis():
@@ -126,7 +135,8 @@ def test_rg_analysis():
 
     with SMolecule.from_pdb_psf_file(pdb_path, psf_path) as mol:
         with crd_convert(mol, crd_ctrl_path) as trajs:
-            rg_analysis(mol, trajs.traj_p[0], 1, rg_analysis_ctrl_path)
+            rg = rg_analysis(mol, trajs.traj_p[0], 1, rg_analysis_ctrl_path)
+            print(rg)
 
 
 if __name__ == "__main__":
