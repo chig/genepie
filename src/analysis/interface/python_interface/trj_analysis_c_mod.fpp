@@ -106,6 +106,7 @@ contains
     write(MsgOut,'(A)') ' '
 
     call dealloc_trajectory(trajectory)
+    call dealloc_molecules_all(molecule)
   end subroutine trj_analysis_main
 
   !======1=========2=========3=========4=========5=========6=========7=========8

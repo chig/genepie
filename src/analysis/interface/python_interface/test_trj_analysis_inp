@@ -1,12 +1,12 @@
 [INPUT]
-psffile        = ../../trajectories/BPTI_charmm/BPTI_ionize.psf
-reffile        = ../../trajectories/BPTI_charmm/BPTI_ionize.pdb
+psffile        = BPTI_ionize.psf
+reffile        = BPTI_ionize.pdb
  
 [OUTPUT]
 disfile        = out             # distance file
  
 [TRAJECTORY]
-trjfile1       = ../../trajectories/BPTI_charmm/BPTI_run.dcd
+trjfile1       = BPTI_run.dcd
 md_step1       = 10
 mdout_period1  = 1
 ana_period1    = 1

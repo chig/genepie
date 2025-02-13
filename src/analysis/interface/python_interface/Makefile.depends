@@ -30,5 +30,9 @@ ma_analysis_analysis.lo: ma_analysis_analysis.fpp s_trajectories_c_mod.mod
 ma_analysis_analyze_c_mod.mod: ma_analysis_analysis.fpp ma_analysis_analysis.lo
 ma_analysis_c_mod.lo: ma_analysis_c_mod.fpp s_trajectories_c_mod.mod ma_analysis_analyze_c_mod.mod s_molecule_c_mod.mod 
 ma_analysis_c_mod.mod: ma_analysis_c_mod.fpp ma_analysis_c_mod.lo
+hb_analysis_analysis.lo: hb_analysis_analysis.fpp s_trajectories_c_mod.mod 
+hb_analysis_analyze_c_mod.mod: hb_analysis_analysis.fpp hb_analysis_analysis.lo
+hb_analysis_c_mod.lo: hb_analysis_c_mod.fpp s_trajectories_c_mod.mod hb_analysis_analyze_c_mod.mod s_molecule_c_mod.mod 
+hb_analysis_c_mod.mod: hb_analysis_c_mod.fpp hb_analysis_c_mod.lo
 your_module.lo: your_module.fpp s_molecule_c_mod.mod conv_f_c_util.mod 
 your_module.mod: your_module.fpp your_module.lo

@@ -1,3 +1,4 @@
+import os
 import ctypes
 import pathlib
 from libgenesis import LibGenesis
@@ -22,14 +23,9 @@ def test():
 
 def test_crd():
     # 関数を呼び出す
-    pdb_path = pathlib.Path(
-            "../../../../tests/regression_test/test_analysis/trajectories/BPTI_charmm/BPTI_ionize.pdb")
-    psf_path = pathlib.Path(
-            "../../../../tests/regression_test/test_analysis/trajectories/BPTI_charmm/BPTI_ionize.psf")
-    ctrl_path = pathlib.Path("./test_crd_inp")
-            # "./test_crd_inp../../../../tests/regression_test/test_analysis/test_crd_convert/BPTI/inp")
-    # traj_path = pathlib.Path(
-    #         "../../../../tests/regression_test/test_analysis/trajectories/BPTI_charmm/BPTI_run.dcd")
+    pdb_path = pathlib.Path("BPTI_ionize.pdb")
+    psf_path = pathlib.Path("BPTI_ionize.psf")
+    ctrl_path = pathlib.Path("test_crd_inp")
     with SMolecule.from_pdb_psf_file(pdb_path, psf_path) as mol:
         with genesis_exe.crd_convert(mol, ctrl_path) as trajs:
             for t in trajs:
@@ -38,12 +34,10 @@ def test_crd():
 
 def test_trj_analysis():
     # 関数を呼び出す
-    pdb_path = pathlib.Path(
-            "../../../../tests/regression_test/test_analysis/trajectories/BPTI_charmm/BPTI_ionize.pdb")
-    psf_path = pathlib.Path(
-            "../../../../tests/regression_test/test_analysis/trajectories/BPTI_charmm/BPTI_ionize.psf")
-    crd_ctrl_path = pathlib.Path("./test_no_crd_inp")
-    trj_analysis_ctrl_path = pathlib.Path("./test_trj_analysis_inp")
+    pdb_path = pathlib.Path("BPTI_ionize.pdb")
+    psf_path = pathlib.Path("BPTI_ionize.psf")
+    crd_ctrl_path = pathlib.Path("test_no_crd_inp")
+    trj_analysis_ctrl_path = pathlib.Path("test_trj_analysis_inp")
 
     with SMolecule.from_pdb_psf_file(pdb_path, psf_path) as mol:
         with genesis_exe.crd_convert(mol, crd_ctrl_path) as trajs:
@@ -55,12 +49,10 @@ def test_trj_analysis():
 
 def test_rg_analysis():
     # 関数を呼び出す
-    pdb_path = pathlib.Path(
-            "../../../../tests/regression_test/test_analysis/trajectories/BPTI_charmm/BPTI_ionize.pdb")
-    psf_path = pathlib.Path(
-            "../../../../tests/regression_test/test_analysis/trajectories/BPTI_charmm/BPTI_ionize.psf")
-    crd_ctrl_path = pathlib.Path("./test_no_crd_inp")
-    rg_analysis_ctrl_path = pathlib.Path("./test_rg_analysis_inp")
+    pdb_path = pathlib.Path("BPTI_ionize.pdb")
+    psf_path = pathlib.Path("BPTI_ionize.psf")
+    crd_ctrl_path = pathlib.Path("test_no_crd_inp")
+    rg_analysis_ctrl_path = pathlib.Path("test_rg_analysis_inp")
 
     with SMolecule.from_pdb_psf_file(pdb_path, psf_path) as mol:
         with genesis_exe.crd_convert(mol, crd_ctrl_path) as trajs:
@@ -71,13 +63,10 @@ def test_rg_analysis():
 
 def test_rmsd_analysis():
     # 関数を呼び出す
-    pdb_path = pathlib.Path(
-            "../../../../tests/regression_test/test_analysis/trajectories/BPTI_charmm/BPTI_ionize.pdb")
-    psf_path = pathlib.Path(
-            "../../../../tests/regression_test/test_analysis/trajectories/BPTI_charmm/BPTI_ionize.psf")
-    crd_ctrl_path = pathlib.Path("./test_no_crd_inp")
-    rmsd_analysis_ctrl_path = pathlib.Path("./test_rmsd_analysis_inp")
-
+    pdb_path = pathlib.Path("BPTI_ionize.pdb")
+    psf_path = pathlib.Path("BPTI_ionize.psf")
+    crd_ctrl_path = pathlib.Path("test_no_crd_inp")
+    rmsd_analysis_ctrl_path = pathlib.Path("test_rmsd_analysis_inp")
     with SMolecule.from_pdb_psf_file(pdb_path, psf_path) as mol:
         with genesis_exe.crd_convert(mol, crd_ctrl_path) as trajs:
             for t in trajs:
@@ -87,14 +76,11 @@ def test_rmsd_analysis():
 
 def test_drms_analysis():
     # 関数を呼び出す
-    pdb_path = pathlib.Path(
-            "../../../../tests/regression_test/test_analysis/trajectories/BPTI_charmm/BPTI_ionize.pdb")
-    psf_path = pathlib.Path(
-            "../../../../tests/regression_test/test_analysis/trajectories/BPTI_charmm/BPTI_ionize.psf")
-    ref_path = pathlib.Path(
-            "../../../../tests/regression_test/test_analysis/trajectories/BPTI_charmm/BPTI_ionize.pdb")
-    crd_ctrl_path = pathlib.Path("./test_no_crd_inp")
-    drms_analysis_ctrl_path = pathlib.Path("./test_drms_analysis_inp")
+    pdb_path = pathlib.Path("BPTI_ionize.pdb")
+    psf_path = pathlib.Path("BPTI_ionize.psf")
+    ref_path = pathlib.Path("BPTI_ionize.pdb")
+    crd_ctrl_path = pathlib.Path("test_no_crd_inp")
+    drms_analysis_ctrl_path = pathlib.Path("test_drms_analysis_inp")
 
     with SMolecule.from_pdb_psf_ref_file(pdb_path, psf_path, ref_path) as mol:
         with genesis_exe.crd_convert(mol, crd_ctrl_path) as trajs:
@@ -105,12 +91,10 @@ def test_drms_analysis():
 
 def test_msd_analysis():
     # 関数を呼び出す
-    pdb_path = pathlib.Path(
-            "../../../../tests/regression_test/test_analysis/trajectories/BPTI_charmm/BPTI_ionize.pdb")
-    psf_path = pathlib.Path(
-            "../../../../tests/regression_test/test_analysis/trajectories/BPTI_charmm/BPTI_ionize.psf")
-    crd_ctrl_path = pathlib.Path("./test_no_crd_inp")
-    msd_analysis_ctrl_path = pathlib.Path("./test_msd_analysis_inp")
+    pdb_path = pathlib.Path("BPTI_ionize.pdb")
+    psf_path = pathlib.Path("BPTI_ionize.psf")
+    crd_ctrl_path = pathlib.Path("test_no_crd_inp")
+    msd_analysis_ctrl_path = pathlib.Path("test_msd_analysis_inp")
 
     with SMolecule.from_pdb_psf_file(pdb_path, psf_path) as mol:
         with genesis_exe.crd_convert(mol, crd_ctrl_path) as trajs:
@@ -119,11 +103,57 @@ def test_msd_analysis():
                 print(msd)
 
 
+def test_hb_analysis_Count_atom():
+    # 関数を呼び出す
+    pdb_path = pathlib.Path("RALP_DPPC_run.pdb")
+    psf_path = pathlib.Path("RALP_DPPC.psf")
+    crd_ctrl_path = pathlib.Path("test_no_crd_hb_analysis_inp")
+    hb_analysis_ctrl_path = pathlib.Path("test_hb_analysis_Count_atom_inp")
+
+    with SMolecule.from_pdb_psf_file(pdb_path, psf_path) as mol:
+        with genesis_exe.crd_convert(mol, crd_ctrl_path) as trajs:
+            for t in trajs:
+                genesis_exe.hb_analysis(
+                        mol, t, 1, hb_analysis_ctrl_path)
+
+
+def test_hb_analysis_Count_snap():
+    # 関数を呼び出す
+    pdb_path = pathlib.Path("RALP_DPPC_run.pdb")
+    psf_path = pathlib.Path("RALP_DPPC.psf")
+    crd_ctrl_path = pathlib.Path("test_no_crd_hb_analysis_inp")
+    hb_analysis_ctrl_path = pathlib.Path("test_hb_analysis_Count_snap_inp")
+
+    with SMolecule.from_pdb_psf_file(pdb_path, psf_path) as mol:
+        with genesis_exe.crd_convert(mol, crd_ctrl_path) as trajs:
+            for t in trajs:
+                genesis_exe.hb_analysis(
+                        mol, t, 1, hb_analysis_ctrl_path)
+
+
 if __name__ == "__main__":
+    if os.path.exists("out"):
+      os.remove("out")
     # test()
     # test_crd()
+    if os.path.exists("out"):
+        os.remove("out")
     # test_trj_analysis()
+    if os.path.exists("out"):
+        os.remove("out")
     # test_rg_analysis()
+    if os.path.exists("out"):
+        os.remove("out")
     # test_rmsd_analysis()
+    if os.path.exists("out"):
+        os.remove("out")
     # test_drms_analysis()
-    test_msd_analysis()
+    if os.path.exists("out"):
+        os.remove("out")
+    # test_msd_analysis()
+    if os.path.exists("out"):
+        os.remove("out")
+    test_hb_analysis_Count_atom()
+    if os.path.exists("out"):
+        os.remove("out")
+    test_hb_analysis_Count_snap()
