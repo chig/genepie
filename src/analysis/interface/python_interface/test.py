@@ -131,7 +131,12 @@ def test_hb_analysis_Count_snap():
                         mol, t, 1, hb_analysis_ctrl_path)
 
 
-if __name__ == "__main__":
+def test_diffusion_analysis():
+    ctrl_path = pathlib.Path("test_da_analysis_inp")
+    genesis_exe.diffusion_analysis(ctrl_path)
+
+
+def main():
     if os.path.exists("out"):
       os.remove("out")
     # test()
@@ -157,3 +162,10 @@ if __name__ == "__main__":
     if os.path.exists("out"):
         os.remove("out")
     test_hb_analysis_Count_snap()
+    # if os.path.exists("out"):
+    #     os.remove("out")
+    # test_diffusion_analysis()
+
+
+if __name__ == "__main__":
+    main()

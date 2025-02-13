@@ -116,6 +116,11 @@ class LibGenesis:
                 ]
         self.lib.ma_analysis_c.restype = None
 
+        self.lib.diffusion_analysis_c.argtyes = [
+                ctypes.c_char_p,
+                ]
+        self.lib.diffusion_analysis_c.restype = None
+
         self.lib.deallocate_double.argtypes = [
                 ctypes.POINTER(ctypes.c_void_p),
                 ctypes.POINTER(ctypes.c_int),
@@ -141,3 +146,5 @@ class LibGenesis:
                 ctypes.POINTER(ctypes.c_void_p),
                 ]
         self.lib.deep_copy_s_trajectories_c.restype = None
+
+        

@@ -252,3 +252,18 @@ def hb_analysis(molecule: SMolecule, trajs :STrajectories,
             )
     n_frame_c = ctypes.c_int(int(trajs.nframe / ana_period))
     return
+
+
+def diffusion_analysis(ctrl_path: str | bytes | os.PathLike):
+    """
+    Executes diffusion_analysis.
+
+    Args:
+        ctrl_path:
+
+    Returns:
+        none
+    """
+    LibGenesis().lib.diffusion_analysis_c(
+            py2c_util.pathlike_to_byte(ctrl_path),
+            )
