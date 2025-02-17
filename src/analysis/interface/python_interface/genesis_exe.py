@@ -237,8 +237,8 @@ def hb_analysis(molecule: SMolecule, trajs :STrajectories,
         ana_period:
         ctrl_path:
 
-    Returns:
-        none
+    Returnsu:
+        TODO
     """
     mol_c = py2c_s_molecule(molecule)
     ana_period_c = ctypes.c_int(ana_period)
@@ -308,7 +308,7 @@ def avecrd_analysis(molecule: SMolecule, trajs :STrajectories,
         ctrl_path:
 
     Returns:
-        none
+        TODO
     """
     mol_c = py2c_s_molecule(molecule)
     ana_period_c = ctypes.c_int(ana_period)
@@ -320,4 +320,20 @@ def avecrd_analysis(molecule: SMolecule, trajs :STrajectories,
             )
     return
 
+
+def wham_analysis(ctrl_path: str | bytes | os.PathLike
+                ):
+    """
+    Executes wham_analysis.
+
+    Args:
+        ctrl_path:
+
+    Returns:
+        none
+    """
+    LibGenesis().lib.wa_analysis_c(
+            py2c_util.pathlike_to_byte(ctrl_path),
+            )
+    return
 

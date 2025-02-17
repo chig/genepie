@@ -153,9 +153,12 @@ def test_avecrd_analysis():
                         mol, t, 1, aa_analysis_ctrl_path)
 
 
+def test_wham_analysis():
+    ctrl_path = pathlib.Path("test_wham_analysis_inp")
+    genesis_exe.wham_analysis(ctrl_path)
+
+
 def main():
-    if os.path.exists("out"):
-      os.remove("out")
     # test()
     # test_crd()
     if os.path.exists("out"):
@@ -184,7 +187,12 @@ def main():
     # test_diffusion_analysis()
     if os.path.exists("out"):
         os.remove("out")
-    test_avecrd_analysis()
+    if os.path.exists("output1_aft.pdb"):
+        os.remove("output1_aft.pdb")
+    # test_avecrd_analysis()
+    if os.path.exists("out"):
+        os.remove("out")
+    test_wham_analysis()
 
 
 if __name__ == "__main__":
