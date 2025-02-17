@@ -1,5 +1,5 @@
 [INPUT]
-cvfile         = ./triala_cv/{}.dis
+cvfile         = ../../../../tests/regression_test/test_analysis/trajectories/triala_cv/{}.dis
 
 [OUTPUT]
 pmffile        = out
