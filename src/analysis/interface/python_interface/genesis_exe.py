@@ -234,6 +234,7 @@ def msd_analysis(molecule: SMolecule, trajs :STrajectories,
             ctypes.byref(num_analysis_mols_c),
             ctypes.byref(num_delta_c),
             )
+
     result_msd = c2py_util.conv_double_ndarray(
             result_msd_c, [num_delta_c.value, num_analysis_mols_c.value])
     LibGenesis().lib.deallocate_double2(
