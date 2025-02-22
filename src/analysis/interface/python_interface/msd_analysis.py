@@ -1,17 +1,14 @@
 import os
-import ctypes
 import pathlib
-from libgenesis import LibGenesis
-from s_molecule import SMolecule, py2c_s_molecule
+from s_molecule import SMolecule
 import genesis_exe
-import msd_reader
 
 
 def test_msd_analysis():
     # 関数を呼び出す
     pdb_path = pathlib.Path("BPTI_ionize.pdb")
     psf_path = pathlib.Path("BPTI_ionize.psf")
-    #crd_ctrl_path = pathlib.Path("test_no_crd_msd_analysis_inp")
+    # crd_ctrl_path = pathlib.Path("test_no_crd_msd_analysis_inp")
     crd_ctrl_path = pathlib.Path("test_no_crd_inp")
     msd_analysis_ctrl_path = pathlib.Path("test_msd_analysis_inp")
 
