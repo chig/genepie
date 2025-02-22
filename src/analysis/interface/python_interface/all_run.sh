@@ -12,6 +12,6 @@ python rmsd_analysis.py
 python drms_analysis.py
 python rg_analysis.py
 python diffusion_analysis.py
-python msd_analysis.py       # seg. fault
-python hb_analysis_count_atom.py        # seg. fault
-python hb_analysis_count_snap.py        # seg. fault
+python msd_analysis.py
+python hb_analysis_count_atom.py
+python hb_analysis_count_snap.py
