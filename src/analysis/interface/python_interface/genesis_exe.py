@@ -1,7 +1,7 @@
 import ctypes
 import os
 import tempfile
-from typing import Optional, List
+from typing import TextIO, Optional, List
 import numpy as np
 import numpy.typing as npt
 from libgenesis import LibGenesis
@@ -42,6 +42,12 @@ def trj_analysis(molecule: SMolecule, trajs :STrajectories,
                  sel_mole_name: Optional[List[str]] = None,
                  check_only: Optional[bool] = False,
                  distance: Optional[List[str]] = [],
+                 dist_weight: Optional[List[str]] = [],
+                 angle: Optional[List[str]] = [],
+                 torsion: Optional[List[str]] = [],
+                 com_distance: Optional[List[str]] = [],
+                 com_angle: Optional[List[str]] = [],
+                 com_torsion: Optional[List[str]] = [],
                  ) -> tuple[npt.NDArray[np.float64],
                             npt.NDArray[np.float64],
                             npt.NDArray[np.float64],
@@ -90,11 +96,9 @@ def trj_analysis(molecule: SMolecule, trajs :STrajectories,
             ctrl_files.write_ctrl_selection(
                     ctrl, sel_group, sel_mole_name)
 
-            ctrl.write(b"[OPTION]\n")
-            ctrl.write("check_only     = {}\n".format("YES" if check_only else "NO")
-                       .encode('utf-8'))
-            for idx, d in enumerate(distance, 1):
-                ctrl.write(f"distance{idx}      = {d}\n".encode('utf-8'))
+            write_trj_analysis_option(
+                    ctrl, check_only, distance, dist_weight, angle, torsion,
+                    com_distance, com_angle, com_torsion)
 
             ctrl.seek(0)
             LibGenesis().lib.trj_analysis_c(
@@ -163,6 +167,36 @@ def trj_analysis(molecule: SMolecule, trajs :STrajectories,
                     ctypes.byref(n_frame_c), ctypes.byref(num_distance))
         if mol_c:
             LibGenesis().lib.deallocate_s_molecule_c(ctypes.byref(mol_c))
+
+
+def write_trj_analysis_option(
+        dst: TextIO,
+        check_only: Optional[bool] = False,
+        distance: Optional[List[str]] = [],
+        dist_weight: Optional[List[str]] = [],
+        angle: Optional[List[str]] = [],
+        torsion: Optional[List[str]] = [],
+        com_distance: Optional[List[str]] = [],
+        com_angle: Optional[List[str]] = [],
+        com_torsion: Optional[List[str]] = [],
+        ):
+    dst.write(b"[OPTION]\n")
+    dst.write("check_only     = {}\n".format("YES" if check_only else "NO")
+               .encode('utf-8'))
+    for idx, d in enumerate(distance, 1):
+        dst.write(f"distance{idx}      = {d}\n".encode('utf-8'))
+    for idx, d in enumerate(dist_weight, 1):
+        dst.write(f"dist_weight{idx}      = {d}\n".encode('utf-8'))
+    for idx, d in enumerate(angle, 1):
+        dst.write(f"angle{idx}      = {d}\n".encode('utf-8'))
+    for idx, d in enumerate(torsion, 1):
+        dst.write(f"torsion{idx}      = {d}\n".encode('utf-8'))
+    for idx, d in enumerate(com_distance, 1):
+        dst.write(f"com_distance{idx}      = {d}\n".encode('utf-8'))
+    for idx, d in enumerate(com_angle, 1):
+        dst.write(f"com_angle{idx}      = {d}\n".encode('utf-8'))
+    for idx, d in enumerate(com_torsion, 1):
+        dst.write(f"com_torsion{idx}      = {d}\n".encode('utf-8'))
 
 
 def rg_analysis(molecule: SMolecule, trajs :STrajectories,
