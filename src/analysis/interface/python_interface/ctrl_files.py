@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import TextIO, Optional, List
+from typing import Iterable, Optional, TextIO
 
 
 def write_ctrl_input(
@@ -249,7 +249,7 @@ class TrajectoryParameters:
 
 def write_trajectory_info(
     dst: TextIO,
-    trajectories: List[TrajectoryParameters],
+    trajectories: Iterable [TrajectoryParameters],
     trj_format: Optional[str] = None,
     trj_type: Optional[str] = None,
     trj_natom: Optional[int] = None
@@ -258,11 +258,11 @@ def write_trajectory_info(
     Write trajectory-related information to a file.
 
     Args:
-        dst: 出力先のファイルオブジェクト
-        trajectories: TrajectoryParametersのリスト
-        trj_format: トラジェクトリフォーマット
-        trj_type: トラジェクトリタイプ
-        trj_natom: 原子数
+        dst: output destination
+        trajectories: Set of TrajectoryParameters
+        trj_format: Trajectory format
+        trj_type: Trajectory type
+        trj_natom: Number of atoms in trajectories
     """
     dst.write(b"[TRAJECTORY]\n")
     for idx, traj in enumerate(trajectories, 1):
@@ -284,8 +284,8 @@ def write_trajectory_info(
         dst.write(f"trj_natom = {trj_natom}\n".encode('utf-8'))
 
 
-def write_ctrl_selection(dst: TextIO, group: Optional[List[str]] = None,
-                         mole_name: Optional[List[str]] = None) -> None:
+def write_ctrl_selection(dst: TextIO, group: Optional[Iterable[str]] = None,
+                         mole_name: Optional[Iterable[str]] = None) -> None:
     """
     Write selection information to a file.
     """

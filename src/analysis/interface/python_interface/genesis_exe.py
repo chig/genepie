@@ -1,7 +1,8 @@
 import ctypes
+from collections import namedtuple
 import os
 import tempfile
-from typing import TextIO, Optional, List
+from typing import Iterable, Optional, TextIO
 import numpy as np
 import numpy.typing as npt
 from libgenesis import LibGenesis
@@ -36,24 +37,29 @@ def crd_convert(molecule: SMolecule,
     return STrajectoriesArray(buf, num_trajs_c.value)
 
 
+TrjAnalysisResult = namedtuple(
+        'TrjAnalysisResult',
+        ['distance',
+         'angle',
+         'torsion',
+         'com_distance',
+         'com_angle',
+         'com_torsion'])
+
+
 def trj_analysis(molecule: SMolecule, trajs :STrajectories,
-                 ana_period: int,
-                 sel_group: Optional[List[str]] = None,
-                 sel_mole_name: Optional[List[str]] = None,
+                 ana_period: Optional[int] = 1,
+                 sel_group: Optional[Iterable[str]] = None,
+                 sel_mole_name: Optional[Iterable[str]] = None,
                  check_only: Optional[bool] = False,
-                 distance: Optional[List[str]] = [],
-                 dist_weight: Optional[List[str]] = [],
-                 angle: Optional[List[str]] = [],
-                 torsion: Optional[List[str]] = [],
-                 com_distance: Optional[List[str]] = [],
-                 com_angle: Optional[List[str]] = [],
-                 com_torsion: Optional[List[str]] = [],
-                 ) -> tuple[npt.NDArray[np.float64],
-                            npt.NDArray[np.float64],
-                            npt.NDArray[np.float64],
-                            npt.NDArray[np.float64],
-                            npt.NDArray[np.float64],
-                            npt.NDArray[np.float64]]:
+                 distance: Optional[Iterable[str]] = [],
+                 dist_weight: Optional[Iterable[str]] = [],
+                 angle: Optional[Iterable[str]] = [],
+                 torsion: Optional[Iterable[str]] = [],
+                 com_distance: Optional[Iterable[str]] = [],
+                 com_angle: Optional[Iterable[str]] = [],
+                 com_torsion: Optional[Iterable[str]] = [],
+                 ) -> TrjAnalysisResult:
     """
     Executes trj_analysis.
 
@@ -138,7 +144,8 @@ def trj_analysis(molecule: SMolecule, trajs :STrajectories,
         result_ctor = (c2py_util.conv_double_ndarray(
                 result_ctor_c, [n_frame_c.value, num_ctor.value])
                         if result_ctor_c else None)
-        return (result_distance, result_angle, result_torsion,
+        return TrjAnalysisResult(
+                result_distance, result_angle, result_torsion,
                 result_cdis, result_cang, result_ctor)
     finally:
         if result_ctor_c:
@@ -172,13 +179,13 @@ def trj_analysis(molecule: SMolecule, trajs :STrajectories,
 def write_trj_analysis_option(
         dst: TextIO,
         check_only: Optional[bool] = False,
-        distance: Optional[List[str]] = [],
-        dist_weight: Optional[List[str]] = [],
-        angle: Optional[List[str]] = [],
-        torsion: Optional[List[str]] = [],
-        com_distance: Optional[List[str]] = [],
-        com_angle: Optional[List[str]] = [],
-        com_torsion: Optional[List[str]] = [],
+        distance: Optional[Iterable[str]] = [],
+        dist_weight: Optional[Iterable[str]] = [],
+        angle: Optional[Iterable[str]] = [],
+        torsion: Optional[Iterable[str]] = [],
+        com_distance: Optional[Iterable[str]] = [],
+        com_angle: Optional[Iterable[str]] = [],
+        com_torsion: Optional[Iterable[str]] = [],
         ):
     dst.write(b"[OPTION]\n")
     dst.write("check_only     = {}\n".format("YES" if check_only else "NO")
