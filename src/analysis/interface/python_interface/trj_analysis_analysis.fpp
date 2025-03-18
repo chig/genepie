@@ -43,20 +43,21 @@ contains
   !
   !  Subroutine    analyze
   !> @brief        run analyzing trajectories
-  !! @authors      NT, TM
-  !! @param[in]    trj_list   : trajectory file list information
+  !! @param[in]    molecule
+  !! @param[in]    trajs_c
+  !! @param[in]    ana_period
   !! @param[inout] option     : option information
-  !! @param[inout] trajectory : trajectory information
+  !! @param[out] distance
+  !! @param[out] angle
+  !! @param[out] torsion
+  !! @param[out] cdis : com distance
+  !! @param[out] cang : com angle
+  !! @param[out] ctor : com torsion
   !
   !======1=========2=========3=========4=========5=========6=========7=========8
-
   subroutine analyze(molecule, trajes_c, ana_period, option, &
-                     distance, num_distance, &
-                     angle, num_angle, &
-                     torsion, num_torsion, &
-                     cdis, num_cdis, &
-                     cang, num_cang, &
-                     ctor, num_ctor)
+                     distance, angle, torsion, &
+                     cdis, cang, ctor)
     use s_trajectories_c_mod
 
     ! formal arguments
@@ -65,17 +66,11 @@ contains
     integer,                 intent(in)    :: ana_period
     type(s_option),          intent(inout) :: option
     real(wp), pointer,       intent(out)   :: distance(:,:)
-    integer,                 intent(out)   :: num_distance
     real(wp), pointer,       intent(out)   :: angle(:,:)
-    integer,                 intent(out)   :: num_angle
     real(wp), pointer,       intent(out)   :: torsion(:,:)
-    integer,                 intent(out)   :: num_torsion
     real(wp), pointer,       intent(out)   :: cdis(:,:)
-    integer,                 intent(out)   :: num_cdis
     real(wp), pointer,       intent(out)   :: cang(:,:)
-    integer,                 intent(out)   :: num_cang
     real(wp), pointer,       intent(out)   :: ctor(:,:)
-    integer,                 intent(out)   :: num_ctor
 
 
     ! local variables
@@ -91,28 +86,22 @@ contains
 
     num_out_frame = trajes_c%nframe / ana_period
     if (option%out_dis) then
-      num_distance = size(option%distance)
-      allocate( distance(num_distance, num_out_frame) )
+      allocate( distance(size(option%distance), num_out_frame) )
     end if
     if (option%out_ang) then
-      num_angle = size(option%angle)
-      allocate( angle(num_angle, num_out_frame) )
+      allocate( angle(size(option%angle), num_out_frame) )
     end if
     if (option%out_tor) then
-      num_torsion = size(option%torsion)
-      allocate( torsion(num_torsion, num_out_frame) )
+      allocate( torsion(size(option%torsion), num_out_frame) )
     end if
     if (option%out_cdis) then
-      num_cdis = size(option%cdistance)
-      allocate( cdis(num_cdis, num_out_frame) )
+      allocate( cdis(size(option%cdistance), num_out_frame) )
     end if
     if (option%out_cang) then
-      num_cang = size(option%cangle)
-      allocate( cang(num_cang, num_out_frame) )
+      allocate( cang(size(option%cangle), num_out_frame) )
     end if
     if (option%out_ctor) then
-      num_ctor = size(option%ctorsion)
-      allocate( ctor(num_ctor, num_out_frame) )
+      allocate( ctor(size(option%ctorsion), num_out_frame) )
     end if
 
     ! analysis loop

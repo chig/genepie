@@ -73,10 +73,12 @@ class LibGenesis:
                 ctypes.POINTER(STrajectoriesC),
                 ctypes.POINTER(ctypes.c_int),
                 ctypes.c_char_p,
-                ctypes.POINTER(ctypes.c_void_p),
-                ctypes.POINTER(ctypes.c_int),
-                ctypes.POINTER(ctypes.c_void_p),
-                ctypes.POINTER(ctypes.c_int),
+                ctypes.POINTER(ctypes.c_void_p), ctypes.POINTER(ctypes.c_int),
+                ctypes.POINTER(ctypes.c_void_p), ctypes.POINTER(ctypes.c_int),
+                ctypes.POINTER(ctypes.c_void_p), ctypes.POINTER(ctypes.c_int),
+                ctypes.POINTER(ctypes.c_void_p), ctypes.POINTER(ctypes.c_int),
+                ctypes.POINTER(ctypes.c_void_p), ctypes.POINTER(ctypes.c_int),
+                ctypes.POINTER(ctypes.c_void_p), ctypes.POINTER(ctypes.c_int),
                 ]
         self.lib.trj_analysis_c.restype = None
 

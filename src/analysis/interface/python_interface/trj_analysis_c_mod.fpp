@@ -77,52 +77,47 @@ contains
     call c2f_s_molecule(molecule, f_molecule)
     call trj_analysis_main( &
         f_molecule, s_trajes_c, ana_period, fort_ctrl_path, &
-        distance_f, num_distance_f, &
-        angle_f, num_angle_f, &
-        torsion_f, num_torsion_f, &
-        cdis_f, num_cdis_f, &
-        cang_f, num_cang_f, &
-        ctor_f, num_ctor_f)
+        distance_f, angle_f, torsion_f, cdis_f, cang_f, ctor_f)
     call dealloc_molecules_all(f_molecule)
 
     if (associated(distance_f)) then
       result_distance = c_loc(distance_f)
-      num_distance = num_distance_f
+      num_distance = size(distance_f, dim=1)
     else
       result_distance = c_null_ptr
       num_distance = 0
     end if
     if (associated(angle_f)) then
       result_angle = c_loc(angle_f)
-      num_angle = num_angle_f
+      num_angle = size(angle_f, dim=1)
     else
       result_angle = c_null_ptr
       num_angle = 0
     end if
     if (associated(torsion_f)) then
       result_torsion = c_loc(torsion_f)
-      num_torsion = num_torsion_f
+      num_torsion = size(torsion_f, dim=1)
     else
       result_torsion = c_null_ptr
       num_torsion = 0
     end if
     if (associated(cdis_f)) then
       result_cdis = c_loc(cdis_f)
-      num_cdis = num_cdis_f
+      num_cdis = size(cdis_f, dim=1)
     else
       result_cdis = c_null_ptr
       num_cdis = 0
     end if
     if (associated(cang_f)) then
       result_cang = c_loc(cang_f)
-      num_cang = num_cang_f
+      num_cang = size(cang_f, dim=1)
     else
       result_cang = c_null_ptr
       num_cang = 0
     end if
     if (associated(ctor_f)) then
       result_ctor = c_loc(ctor_f)
-      num_ctor = num_ctor_f
+      num_ctor = size(ctor_f, dim=1)
     else
       result_ctor = c_null_ptr
       num_ctor = 0
@@ -131,29 +126,19 @@ contains
 
   subroutine trj_analysis_main( &
           molecule, s_trajes_c, ana_period, ctrl_filename, &
-          result_distance, num_distance, &
-          result_angle, num_angle, &
-          result_torsion, num_torsion, &
-          result_cdis, num_cdis, &
-          result_cang, num_cang, &
-          result_ctor, num_ctor)
+          result_distance, result_angle, result_torsion, &
+          result_cdis, result_cang, result_ctor)
     implicit none
     type(s_molecule), intent(inout) :: molecule
     type(s_trajectories_c), intent(in) :: s_trajes_c
     integer,                intent(in) :: ana_period
     character(*), intent(in) :: ctrl_filename
     real(wp), pointer, intent(out) :: result_distance(:,:)
-    integer, intent(out) :: num_distance
     real(wp), pointer, intent(out) :: result_angle(:,:)
-    integer, intent(out) :: num_angle
     real(wp), pointer, intent(out) :: result_torsion(:,:)
-    integer, intent(out) :: num_torsion
     real(wp), pointer, intent(out) :: result_cdis(:,:)
-    integer, intent(out) :: num_cdis
     real(wp), pointer, intent(out) :: result_cang(:,:)
-    integer, intent(out) :: num_cang
     real(wp), pointer, intent(out) :: result_ctor(:,:)
-    integer, intent(out) :: num_ctor
 
     ! local variables
     type(s_ctrl_data)      :: ctrl_data
@@ -188,12 +173,8 @@ contains
     write(MsgOut,'(A)') ' '
 
     call analyze(molecule, s_trajes_c, ana_period, option, &
-                 result_distance, num_distance, &
-                 result_angle, num_angle, &
-                 result_torsion, num_torsion, &
-                 result_cdis, num_cdis, &
-                 result_cang, num_cang, &
-                 result_ctor, num_ctor)
+                 result_distance, result_angle, result_torsion, &
+                 result_cdis, result_cang, result_ctor)
 
 
     ! [Step4] Deallocate memory
