@@ -478,8 +478,18 @@ def msd_analysis(
 
 
 def hb_analysis(molecule: SMolecule, trajs :STrajectories,
-                ana_period: int,
-                ctrl_path: str | bytes | os.PathLike
+                ana_period: Optional[int] = 1,
+                selection_group: Optional[Iterable[str]] = None,
+                selection_mole_name: Optional[Iterable[str]] = None,
+                check_only: Optional[bool] = None,
+                output_type: Optional[str] = None,
+                solvent_list: Optional[str] = None,
+                analysis_atom: Optional[int] = None,
+                target_atom: Optional[int] = None,
+                boundary_type: Optional[str] = None,
+                hb_distance: Optional[float] = None,
+                dha_angle: Optional[float] = None,
+                hda_angle: Optional[float] = None,
                 ) -> str:
     """
     Executes hb_analysis.
@@ -488,24 +498,47 @@ def hb_analysis(molecule: SMolecule, trajs :STrajectories,
         molecule:
         trajs:
         ana_period:
-        ctrl_path:
-
     Returnsu:
-        TODO
+        result
     """
-    mol_c = molecule.to_SMoleculeC()
+    mol_c = None
     ana_period_c = ctypes.c_int(ana_period)
-    result = ctypes.c_void_p()
-    LibGenesis().lib.hb_analysis_c(
-            ctypes.byref(mol_c),
-            ctypes.byref(trajs.get_c_obj()),
-            ctypes.byref(ana_period_c),
-            py2c_util.pathlike_to_byte(ctrl_path),
-            ctypes.byref(result),
-            )
-    s = c2py_util.conv_string(result)
-    LibGenesis().lib.deallocate_c_string(ctypes.byref(result))
-    return s
+    result = ctypes.c_void_p(None)
+    try:
+        mol_c = molecule.to_SMoleculeC()
+        with tempfile.NamedTemporaryFile(dir=os.getcwd(), delete=True) as ctrl:
+            ctrl_files.write_ctrl_output(
+                    ctrl,
+                    outfile = "dummy.out")
+            ctrl_files.write_ctrl_selection(
+                    ctrl, selection_group, selection_mole_name)
+            ctrl.write(b"[OPTION]\n")
+            ctrl_files.write_kwargs(
+                    ctrl,
+                    check_only = check_only,
+                    output_type = output_type,
+                    solvent_list = solvent_list,
+                    analysis_atom = analysis_atom,
+                    target_atom = target_atom,
+                    boundary_type = boundary_type,
+                    hb_distance = hb_distance,
+                    dha_angle = dha_angle,
+                    hda_angle = hda_angle,
+                    )
+
+            ctrl.seek(0)
+            LibGenesis().lib.hb_analysis_c(
+                    ctypes.byref(mol_c),
+                    ctypes.byref(trajs.get_c_obj()),
+                    ctypes.byref(ana_period_c),
+                    py2c_util.pathlike_to_byte(ctrl.name),
+                    ctypes.byref(result),
+                    )
+        s = c2py_util.conv_string(result)
+        return s
+    finally:
+        if result:
+            LibGenesis().lib.deallocate_c_string(ctypes.byref(result))
 
 
 def diffusion_analysis(msd_data: npt.NDArray[np.float64],
@@ -553,7 +586,7 @@ def diffusion_analysis(msd_data: npt.NDArray[np.float64],
 
 AvecrdAnalysisResult = namedtuple(
         'AvecrdAnalysisResult',
-        ['pdb_str'])
+        ['pdb'])
 
 
 def avecrd_analysis(

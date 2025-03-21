@@ -13,7 +13,7 @@ def test_rmsd_analysis():
     with SMolecule.from_pdb_psf_file(pdb_path, psf_path) as mol:
         with genesis_exe.crd_convert(mol, crd_ctrl_path) as trajs:
             for t in trajs:
-                rmsd, = genesis_exe.rmsd_analysis(
+                d = genesis_exe.rmsd_analysis(
                         mol, t,
                         selection_group = ["sid:BPTI and an:CA", ],
                         fitting_method = "TR+ROT",
@@ -21,7 +21,7 @@ def test_rmsd_analysis():
                         check_only = False,
                         analysis_atom  = 1,
                         )
-                print(rmsd, flush=True)
+                print(d.rmsd, flush=True)
 
 
 def main():

@@ -13,7 +13,7 @@ def test_avecrd_analysis():
     with SMolecule.from_pdb_psf_file(pdb_path, psf_path) as mol:
         with genesis_exe.crd_convert(mol, crd_ctrl_path) as trajs:
             for t in trajs:
-                pdb_ave, = genesis_exe.avecrd_analysis(
+                d = genesis_exe.avecrd_analysis(
                         mol, t,
                         selection_group = ["an:CA", ],
                         fitting_method = "TR+ROT",
@@ -22,7 +22,7 @@ def test_avecrd_analysis():
                         num_iterations = 5,
                         analysis_atom  = 1,
                         )
-                print(pdb_ave)
+                print(d.pdb)
 
 
 def main():

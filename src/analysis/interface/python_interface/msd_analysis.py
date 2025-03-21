@@ -13,7 +13,7 @@ def test_msd_analysis():
     with SMolecule.from_pdb_psf_file(pdb_path, psf_path) as mol:
         with genesis_exe.crd_convert(mol, crd_ctrl_path) as trajs:
             for t in trajs:
-                msd, = genesis_exe.msd_analysis(
+                d = genesis_exe.msd_analysis(
                         mol, t,
                         selection_group = ["rnam:TIP3", ],
                         selection = [1, ],
@@ -21,7 +21,7 @@ def test_msd_analysis():
                         oversample = True,
                         delta = 9,
                         )
-                print(msd, flush=True)
+                print(d.msd, flush=True)
 
 
 def main():
