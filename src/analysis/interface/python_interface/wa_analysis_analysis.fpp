@@ -850,7 +850,7 @@ contains
     !
     if (output%pmffile /= '') then
 
-      call open_file(file, output%pmffile, IOFileOutputNew)
+      ! call open_file(file, output%pmffile, IOFileOutputNew)
 
       if (option%dimension == 1) then
 
@@ -867,7 +867,7 @@ contains
         write(fmt,'(a,i0,a)') '(', ncol+1,'es25.16e3)'
 
         do ibin = 1, nbin
-          write(file,fmt=fmt) center(ibin), (pmf_m(j)%v(ibin),j=1,ncol)
+          ! write(file,fmt=fmt) center(ibin), (pmf_m(j)%v(ibin),j=1,ncol)
           pmf(:, ibin) = [center(ibin), (pmf_m(j)%v(ibin),j=1,ncol)]
         end do
 
@@ -898,14 +898,14 @@ contains
         write(fmt,'(a,i0,a)') '(',nbin_x, 'es25.16e3)'
         
         do ibin_y = 1, nbin_y
-          write(file,fmt=fmt) &
-               (pmf_m(1)%v((ibin_x-1)+(ibin_y-1)*nbin_x+1),ibin_x=1,nbin_x)
+          ! write(file,fmt=fmt) &
+          !      (pmf_m(1)%v((ibin_x-1)+(ibin_y-1)*nbin_x+1),ibin_x=1,nbin_x)
           pmf(:, ibin_y) = [(pmf_m(1)%v((ibin_x-1)+(ibin_y-1)*nbin_x+1),ibin_x=1,nbin_x)]
         end do
 
       end if
 
-      call close_file(file)
+      ! call close_file(file)
 
     end if
 

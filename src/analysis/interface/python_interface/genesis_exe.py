@@ -664,8 +664,32 @@ def avecrd_analysis(
     return None
 
 
-def wham_analysis(ctrl_path: str | bytes | os.PathLike
-                ):
+def wham_analysis(
+        psffile: Optional[str] = None,
+        prmtopfile: Optional[str] = None,
+        ambcrdfile: Optional[str] = None,
+        grotopfile: Optional[str] = None,
+        grocrdfile: Optional[str] = None,
+        pdbfile: Optional[str] = None,
+        dcdfile: Optional[str] = None,
+        cvfile: Optional[str] = None,
+        check_only: Optional[bool] = None,
+        allow_backup: Optional[bool] = None,
+        dimension: Optional[int] = None,
+        nblocks: Optional[int] = None,
+        temperature: Optional[float] = None,
+        tolerance: Optional[float] = None,
+        rest_function: Optional[Iterable[int]] = None,
+        grids: Optional[Iterable[tuple[float, float, int]]] = None,
+        selection_group: Optional[Iterable[str]] = None,
+        selection_mole_name: Optional[Iterable[str]] = None,
+        function: Optional[Iterable[str]] = None,
+        select_index: Iterable[Iterable[int]] = None,
+        constant: Iterable[Iterable[int]] = None,
+        reference: Iterable[Iterable[float]] = None,
+        is_periodic: Iterable[bool] = None,
+        box_size: Iterable[float] = None,
+        ):
     """
     Executes wham_analysis.
 
@@ -678,18 +702,53 @@ def wham_analysis(ctrl_path: str | bytes | os.PathLike
     result_pmf_c = ctypes.c_void_p(None)
     n_bins = ctypes.c_int(0)
     n_bin_x = ctypes.c_int(0)
-    LibGenesis().lib.wa_analysis_c(
-            py2c_util.pathlike_to_byte(ctrl_path),
-            ctypes.byref(result_pmf_c),
-            ctypes.byref(n_bins),
-            ctypes.byref(n_bin_x),
-            )
-    result_pmf = c2py_util.conv_double_ndarray(
-            result_pmf_c, [n_bins.value, n_bin_x.value])
-    LibGenesis().lib.deallocate_double2(
-            ctypes.byref(result_pmf_c),
-            ctypes.byref(n_bins), ctypes.byref(n_bin_x))
-    return result_pmf
+    try:
+        with tempfile.NamedTemporaryFile(dir=os.getcwd(), delete=True) as ctrl:
+            ctrl_files.write_ctrl_output(
+                    ctrl,
+                    pmffile = "dummy.pmf")
+            ctrl.write(b'[WHAM]\n')
+            ctrl_files.write_kwargs(
+                    ctrl,
+                    check_only = check_only,
+                    allow_backup = allow_backup,
+                    dimension = dimension,
+                    nblocks = nblocks,
+                    temperature = temperature,
+                    tolerance = tolerance,
+                    rest_function = ctrl_files.NumberingData(rest_function),
+                    grids = ctrl_files.NumberingData(grids),
+                    )
+            ctrl_files.write_ctrl_selection(
+                    ctrl, selection_group, selection_mole_name)
+            ctrl.write(b'[RESTRAINTS]\n')
+            ctrl_files.write_kwargs(
+                    ctrl,
+                    function     = ctrl_files.NumberingData(function),
+                    select_index = ctrl_files.NumberingData(select_index),
+                    constant     = ctrl_files.NumberingData(constant),
+                    reference    = ctrl_files.NumberingData(reference),
+                    is_periodic  = ctrl_files.NumberingData(is_periodic),
+                    box_size     = ctrl_files.NumberingData(box_size),
+                    )
+
+
+            ctrl.seek(0)
+            LibGenesis().lib.wa_analysis_c(
+                    py2c_util.pathlike_to_byte(ctrl.name),
+                    ctypes.byref(result_pmf_c),
+                    ctypes.byref(n_bins),
+                    ctypes.byref(n_bin_x),
+                    )
+            result_pmf = c2py_util.conv_double_ndarray(
+                    result_pmf_c, [n_bins.value, n_bin_x.value])
+
+            return result_pmf
+    finally:
+        if result_pmf_c:
+            LibGenesis().lib.deallocate_double2(
+                    ctypes.byref(result_pmf_c),
+                    ctypes.byref(n_bins), ctypes.byref(n_bin_x))
 
 
 def mbar_analysis(ctrl_path: str | bytes | os.PathLike

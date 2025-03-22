@@ -342,7 +342,7 @@ def bool_to_yes_no(v: bool) -> str:
 
 
 def float_to_str(v: float) -> str:
-    return f"{v:.12E}"
+    return f"{v:.6E}"
 
 
 def iterable_to_str(vals: Iterable[Any]) -> str:
