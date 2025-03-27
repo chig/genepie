@@ -704,6 +704,17 @@ def wham_analysis(
     n_bin_x = ctypes.c_int(0)
     try:
         with tempfile.NamedTemporaryFile(dir=os.getcwd(), delete=True) as ctrl:
+            ctrl_files.write_ctrl_input(
+                    ctrl,
+                    psffile = psffile,
+                    prmtopfile = prmtopfile,
+                    ambcrdfile = ambcrdfile,
+                    grotopfile = grotopfile,
+                    grocrdfile = grocrdfile,
+                    pdbfile = pdbfile,
+                    dcdfile = dcdfile,
+                    cvfile = cvfile,
+                    )
             ctrl_files.write_ctrl_output(
                     ctrl,
                     pmffile = "dummy.pmf")

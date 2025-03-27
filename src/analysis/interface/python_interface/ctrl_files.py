@@ -101,7 +101,7 @@ def write_ctrl_input(
         "Distfile": distfile,
     }
 
-    dst.write("b[INPUT]\n")
+    dst.write(b"[INPUT]\n")
     for ctrl_name, value in mapping.items():
         if value is not None:
             dst.write(f"{ctrl_name} = {value}\n".encode('utf-8'))
