@@ -4,13 +4,14 @@ import numpy as np
 import numpy.typing as npt
 from s_trajectories_c import STrajectoriesC
 from libgenesis import LibGenesis
+from s_molecule import SMolecule
 
 
 class STrajectories:
     natom: int
     nframe: int
-    coords: npt.NDArray[np.float64]
-    pbc_boxes: npt.NDArray[np.float64]
+    coords: npt.NDArray[np.float64] # shape=(n_frame, n_atom, 3)
+    pbc_boxes: npt.NDArray[np.float64] # shape=(trajs_c.nframe, 3, 3)
     c_obj: STrajectoriesC
 
     def __init__(self, natom: int = 0, nframe: int = 0,
@@ -25,10 +26,15 @@ class STrajectories:
         self.natom = trajs_c.natom
         self.nframe = trajs_c.nframe
         self.coords = np.ctypeslib.as_array(
-            trajs_c.coords, shape=(trajs_c.nframe, trajs_c.natom, 3))
+                ctypes.cast(trajs_c.coords, ctypes.POINTER(
+                    ctypes.c_double * trajs_c.nframe * trajs_c.natom * 3)).contents
+                ).reshape(
+                trajs_c.nframe, trajs_c.natom, 3)
         self.pbc_boxes = np.ctypeslib.as_array(
-            trajs_c.pbc_boxes, shape=(trajs_c.nframe, 3, 3))
-        self.mem_owner = mem_owner
+                ctypes.cast(trajs_c.pbc_boxes, ctypes.POINTER(
+                    ctypes.c_double * trajs_c.nframe * 3 * 3)).contents
+                ).reshape(trajs_c.nframe, 3, 3)
+        self._mem_owner = mem_owner
 
     def __del__(self) -> None:
         self.free()
@@ -47,7 +53,7 @@ class STrajectories:
 
     def free(self):
         """deallocate resources"""
-        if self.mem_owner and self.c_obj:
+        if self._mem_owner and self.c_obj:
             LibGenesis().lib.deallocate_s_trajectories_c(
                     ctypes.byref(self.c_obj))
             self.c_obj = None
@@ -57,6 +63,60 @@ class STrajectories:
 
     def from_trajectories_c(trajs_c: STrajectoriesC, mem_owner=True) -> Self:
         return STrajectories(trajs_c=trajs_c, mem_owner=mem_owner)
+
+try:
+    import mdtraj as md
+
+    def to_mdtraj_trajectory(self, smol: SMolecule) -> md.Trajectory:
+        """
+
+        Returns
+            MDTraj Trajectory
+        -------
+        """
+        traj = md.Trajectory()
+        traj.top = smol.to_mdtraj_topology()
+        traj.unitcell_vectors  = self.pbc_boxes
+        traj.xyz = self.coords
+        return traj
+
+    STrajectories.to_mdtraj_trajectory = to_mdtraj_trajectory
+
+    @staticmethod
+    def from_mdtraj_trajectory(src: md.Trajectory) -> tuple[Self, SMolecule]:
+        straj = STrajectories(src.n_atoms, src.n_frames)
+        straj.coords = src.xyz
+        straj.pbc_boxes = src.unitcell_vectors()
+        return (straj, SMolecule.from_mdtraj_topology(src.topology()))
+
+    STrajectories.from_mdtraj_trajectory = from_mdtraj_trajectory
+
+except ImportError:
+    pass
+
+
+try:
+    import MDAnalysis as mda
+    from MDAnalysis.lib.mdamath import triclinic_vectors
+
+    def to_mdanalysis_universe(self, smol: SMolecule) -> mda.Universe:
+        pass
+
+    STrajectories.to_mdanalysis_universe = to_mdanalysis_universe
+
+    @staticmethod
+    def from_mdanalysis_universe(src: mda.Universe) -> tuple[Self, SMolecule]:
+        straj = STrajectories(src.atoms.n_atoms, len(src.trajectory))
+        for i, ts in enumerate(src.trajectory):
+            straj.coords[i, :, :] = src.atoms.positions
+            straj.pbc_boxes[i, :, :] = triclinic_vectors(src.dimensions)
+        mol = SMolecule.from_mdanalysis_universe(src)
+        return (straj, mol)
+
+    STrajectories.from_mdanalysis_universe = from_mdanalysis_universe
+
+except ImportError:
+    pass
 
 
 class STrajectoriesArray:

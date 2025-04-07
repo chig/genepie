@@ -4,7 +4,7 @@ import numpy as np
 import numpy.typing as npt
 import c2py_util
 import py2c_util
-from typing import Self, Optional, Union
+from typing import Self, Union
 from libgenesis import LibGenesis
 from s_molecule_c import SMoleculeC
 
@@ -513,5 +513,84 @@ except ImportError:
     pass
 
 
+try:
+    import MDAnalysis as mda
+    from MDAnalysis.core.topologyattrs import Atomnames as mdaAtomnames
+    from MDAnalysis.core.topologyattrs import ChainIDs as mdaChainIDs
+    from MDAnalysis.core.topology import Topology as mdaTopology
 
 
+    def to_mdanalysis_topology(self) -> mdaTopology:
+        """
+
+        Returns
+            MDAnalysis Topology
+        -------
+        """
+        names = []
+        chainids = []
+        for i in range(0, self.num_atoms):
+            names.append(str(self.atom_name[i]))
+            chainids.append(str(self.chain_id[i]))
+
+        attrs = []
+        for vals, Attr, dtype in (
+                (names, mdaAtomnames, object),
+                (chainids, mdaChainIDs, object),
+                ):
+            attrs.append(Attr(np.array(vals, dtype=dtype)))
+        top = mdaTopology(
+                n_atoms = self.num_atoms,
+                n_res = self.num_residues,
+                n_seg = self.num_segments,
+                attrs = attrs,
+                )
+        return top
+
+    SMolecule.to_mdanalysis_topology = to_mdanalysis_topology
+
+    @staticmethod
+    def from_mdanalysis_universe(uni: mda.Universe) -> Self:
+        mol = SMolecule()
+        mol.num_atoms = len(uni.atoms)
+
+        mol.atom_name = np.empty(mol.num_atoms, dtype=np.str_)
+        mol.atom_no = np.empty(mol.num_atoms, dtype=np.int64)
+        mol.charge = np.empty(mol.num_atoms, dtype=np.float64)
+        mol.residue_no = np.empty(mol.num_atoms, dtype=np.int64)
+        mol.residue_name = np.empty(mol.num_atoms, dtype=np.str_)
+        mol.chain_id = np.empty(mol.num_atoms, dtype=np.str_)
+        for i, atom in enumerate(uni.atoms):
+            mol.atom_name[i] = np.str_(atom.name)
+            mol.atom_no[i] = atom.index
+            try:
+                mol.charge[i] = atom.formalcharge
+            except mda.exceptions.NoDataError:
+                mol.charge[i] = 0.0
+            mol.residue_no[i] = atom.residue.resindex
+            try:
+                mol.residue_name[i] = np.str_(atom.residue.name)
+            except mda.exceptions.NoDataError:
+                mol.residue_name[i] = np.str_('')
+            mol.chain_id[i] = np.str_(atom.chainID)
+        try:
+            mol.num_bonds = len(uni.bonds)
+            mol.bond_list = np.empty((mol.num_bonds, 2), dtype=np.int64)
+            for i, bond in enumerate(uni.bonds):
+                mol.bond_list[i,0] = bond.atoms[0].index
+                mol.bond_list[i,1] = bond.atoms[1].index
+        except mda.exceptions.NoDataError:
+            mol.bond_list = np.empty((0, 2), dtype=np.int64)
+        mol.num_molecules = 1
+        return mol
+
+    SMolecule.from_mdanalysis_universe = from_mdanalysis_universe
+
+    @staticmethod
+    def from_mdanalysis_topology(top: mdaTopology) -> Self:
+        return from_mdanalysis_universe(mda.Universe(topology = top))
+
+    SMolecule.from_mdanalysis_topology = from_mdanalysis_topology
+
+except ImportError:
+    pass
