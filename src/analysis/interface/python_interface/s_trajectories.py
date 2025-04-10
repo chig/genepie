@@ -97,12 +97,26 @@ except ImportError:
 
 try:
     import MDAnalysis as mda
+    from MDAnalysis.coordinates.memory import MemoryReader
     from MDAnalysis.lib.mdamath import triclinic_vectors
+    from MDAnalysis.lib.mdamath import triclinic_box
 
     def to_mdanalysis_universe(self, smol: SMolecule) -> mda.Universe:
-        pass
+        top = smol.to_mdanalysis_topology()
+        uni = mda.Universe(topology = top)
+        # self.add_coordinates_to_mdanalysis_universe(uni)
+        return uni
 
     STrajectories.to_mdanalysis_universe = to_mdanalysis_universe
+
+    def add_coordinates_to_mdanalysis_universe(
+            self, uni: mda.Universe) -> None:
+        uni.load_new(self.coords, format=MemoryReader, order='fac', dt=1.0)
+        for sb, ut in zip(self.pbc_boxes,  uni.trajectory):
+            ut.dimensions = triclinic_box(sb[0,:], sb[1,:], sb[2,:])
+
+    STrajectories.add_coordinates_to_mdanalysis_universe \
+            = add_coordinates_to_mdanalysis_universe
 
     @staticmethod
     def from_mdanalysis_universe(src: mda.Universe) -> tuple[Self, SMolecule]:

@@ -32,12 +32,12 @@ def conv_double_ndarray(src: ctypes.c_void_p, size: int | list[int]) \
 
 
 def conv_fixed_length_string_ndarray(
-        src: ctypes.c_void_p, size: int | list[int]) -> npt.NDArray[np.str_]:
-    if src:
+        str_array: ctypes.c_void_p, size: int | list[int]) -> npt.NDArray[np.str_]:
+    if str_array:
         if type(int) is int:
             size = tuple(size)
         all_size = np.prod(size)
-        ptr = ctypes.cast(src, ctypes.POINTER(ctypes.c_char))
+        ptr = ctypes.cast(str_array, ctypes.POINTER(ctypes.c_char))
         dst = np.empty(all_size, dtype=str)
         for i in range(0, all_size):
             dst[i] = ptr[i].decode('ascii')
@@ -45,8 +45,23 @@ def conv_fixed_length_string_ndarray(
     else:
         return np.empty(0, dtype=np.str_)
 
-def conv_string(c_char_ptr: ctypes.c_void_p, encoding: str = 'utf-8') -> str:
+
+def conv_pystring_ndarray(
+        str_array: ctypes.c_void_p, size: tuple[int, int]) -> npt.NDArray[np.object_]:
+    if str_array:
+        ptr = ctypes.cast(str_array, ctypes.POINTER(ctypes.c_char))
+        dst = np.empty(size[0], dtype=np.object_)
+        for i in range(0, size[0]):
+            cur_ptr = ctypes.cast(ctypes.addressof(ptr.contents) + i * size[1],
+                                  ctypes.POINTER(ctypes.c_char))
+            dst[i] = conv_string(cur_ptr, size[1])
+        return dst
+    else:
+        return np.empty(0, dtype=np.object_)
+
+
+def conv_string(c_char_ptr: ctypes.c_void_p, size: int = -1, encoding: str = 'utf-8') -> str:
     if not c_char_ptr:
         raise ValueError("Invalid pointer: c_char_ptr is None")
-    byte_str = ctypes.string_at(c_char_ptr)
+    byte_str = ctypes.string_at(c_char_ptr, size)
     return byte_str.decode(encoding)

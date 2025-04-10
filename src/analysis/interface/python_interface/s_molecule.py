@@ -25,13 +25,13 @@ class SMolecule:
     special_hydrogen: bool
     total_charge: float
     atom_no: npt.NDArray[np.int64]
-    segment_name: npt.NDArray[np.str_]
+    segment_name: npt.NDArray[np.object_]
     segment_no: npt.NDArray[np.int64]
     residue_no: npt.NDArray[np.int64]
     residue_c_no: npt.NDArray[np.int64]
-    residue_name: npt.NDArray[np.str_]
-    atom_name: npt.NDArray[np.str_]
-    atom_cls_name: npt.NDArray[np.str_]
+    residue_name: npt.NDArray[np.object_]
+    atom_name: npt.NDArray[np.object_]
+    atom_cls_name: npt.NDArray[np.object_]
     atom_cls_no: npt.NDArray[np.int64]
     charge: npt.NDArray[np.float64]
     mass: npt.NDArray[np.float64]
@@ -39,7 +39,7 @@ class SMolecule:
     imove: npt.NDArray[np.int64]
     stokes_radius: npt.NDArray[np.float64]
     inv_stokes_radius: npt.NDArray[np.float64]
-    chain_id: npt.NDArray[np.str_]
+    chain_id: npt.NDArray[np.object_]
     atom_coord: npt.NDArray[np.float64]
     atom_occupancy: npt.NDArray[np.float64]
     atom_temp_factor: npt.NDArray[np.float64]
@@ -55,7 +55,7 @@ class SMolecule:
     cmap_list: npt.NDArray[np.int64]
     molecule_atom_no: npt.NDArray[np.int64]
     molecule_mass: npt.NDArray[np.float64]
-    molecule_name: npt.NDArray[np.str_]
+    molecule_name: npt.NDArray[np.object_]
     atom_refcoord: npt.NDArray[np.float64]
     atom_fitcoord: npt.NDArray[np.float64]
     num_pc_modes: int
@@ -183,7 +183,7 @@ class SMolecule:
         dst.special_hydrogen = src.special_hydrogen
         dst.total_charge = src.total_charge
         dst.atom_no = c2py_util.conv_int_ndarray(src.atom_no, dst.num_atoms)
-        dst.segment_name = c2py_util.conv_fixed_length_string_ndarray(
+        dst.segment_name = c2py_util.conv_pystring_ndarray(
             src.segment_name, (dst.num_atoms, 4)
         )
         dst.segment_no = c2py_util.conv_int_ndarray(
@@ -192,13 +192,13 @@ class SMolecule:
                 src.residue_no, dst.num_atoms)
         dst.residue_c_no = c2py_util.conv_int_ndarray(
                 src.residue_c_no, dst.num_atoms)
-        dst.residue_name = c2py_util.conv_fixed_length_string_ndarray(
+        dst.residue_name = c2py_util.conv_pystring_ndarray(
             src.residue_name, (dst.num_atoms, 6)
         )
-        dst.atom_name = c2py_util.conv_fixed_length_string_ndarray(
+        dst.atom_name = c2py_util.conv_pystring_ndarray(
             src.atom_name, (dst.num_atoms, 4)
         )
-        dst.atom_cls_name = c2py_util.conv_fixed_length_string_ndarray(
+        dst.atom_cls_name = c2py_util.conv_pystring_ndarray(
             src.atom_cls_name, (dst.num_atoms, 6)
         )
         dst.atom_cls_no = c2py_util.conv_int_ndarray(
@@ -213,7 +213,7 @@ class SMolecule:
         dst.inv_stokes_radius = c2py_util.conv_double_ndarray(
             src.inv_stokes_radius, dst.num_atoms)
 
-        dst.chain_id = c2py_util.conv_fixed_length_string_ndarray(
+        dst.chain_id = c2py_util.conv_pystring_ndarray(
             src.chain_id, (dst.num_atoms, 1)
         )
         dst.atom_coord = c2py_util.conv_double_ndarray(
@@ -248,7 +248,7 @@ class SMolecule:
             src.molecule_atom_no, dst.num_molecules)
         dst.molecule_mass = c2py_util.conv_double_ndarray(
             src.molecule_mass, dst.num_molecules)
-        dst.molecule_name = c2py_util.conv_fixed_length_string_ndarray(
+        dst.molecule_name = c2py_util.conv_pystring_ndarray(
             src.molecule_name, (dst.num_molecules, 10))
         dst.atom_refcoord = c2py_util.conv_double_ndarray(
             src.atom_refcoord, (src.num_atoms, 3))
@@ -317,13 +317,13 @@ class SMolecule:
         dst.special_hydrogen = self.special_hydrogen
         dst.total_charge = self.total_charge
         py2c_util.write_int_ndarray(self.atom_no, dst.atom_no)
-        py2c_util.write_fixed_length_string_ndarray(self.segment_name, dst.segment_name)
+        py2c_util.write_pystring_ndarray(self.segment_name, dst.segment_name)
         py2c_util.write_int_ndarray(self.segment_no, dst.segment_no)
         py2c_util.write_int_ndarray(self.residue_no, dst.residue_no)
         py2c_util.write_int_ndarray(self.residue_c_no, dst.residue_c_no)
-        py2c_util.write_fixed_length_string_ndarray(self.residue_name, dst.residue_name)
-        py2c_util.write_fixed_length_string_ndarray(self.atom_name, dst.atom_name)
-        py2c_util.write_fixed_length_string_ndarray(self.atom_cls_name, dst.atom_cls_name)
+        py2c_util.write_pystring_ndarray(self.residue_name, dst.residue_name)
+        py2c_util.write_pystring_ndarray(self.atom_name, dst.atom_name)
+        py2c_util.write_pystring_ndarray(self.atom_cls_name, dst.atom_cls_name)
         py2c_util.write_int_ndarray(self.atom_cls_no, dst.atom_cls_no)
         py2c_util.write_double_ndarray(self.charge, dst.charge)
         py2c_util.write_double_ndarray(self.mass, dst.mass)
@@ -332,7 +332,7 @@ class SMolecule:
         py2c_util.write_double_ndarray(self.stokes_radius, dst.stokes_radius)
         py2c_util.write_double_ndarray(self.inv_stokes_radius, dst.inv_stokes_radius)
 
-        py2c_util.write_fixed_length_string_ndarray(self.chain_id, dst.chain_id)
+        py2c_util.write_pystring_ndarray(self.chain_id, dst.chain_id)
         py2c_util.write_double_ndarray(self.atom_coord, dst.atom_coord)
         py2c_util.write_double_ndarray(self.atom_occupancy, dst.atom_occupancy)
         py2c_util.write_double_ndarray(self.atom_temp_factor, dst.atom_temp_factor)
@@ -348,7 +348,7 @@ class SMolecule:
         py2c_util.write_int_ndarray(self.cmap_list, dst.cmap_list)
         py2c_util.write_int_ndarray(self.molecule_atom_no, dst.molecule_atom_no)
         py2c_util.write_double_ndarray(self.molecule_mass, dst.molecule_mass)
-        py2c_util.write_fixed_length_string_ndarray(self.molecule_name, dst.molecule_name)
+        py2c_util.write_pystring_ndarray(self.molecule_name, dst.molecule_name)
         py2c_util.write_double_ndarray(self.atom_refcoord, dst.atom_refcoord)
         py2c_util.write_double_ndarray(self.atom_fitcoord, dst.atom_fitcoord)
 
@@ -410,6 +410,36 @@ class SMolecule:
             LibGenesis().lib.deallocate_s_molecule_c(ctypes.byref(mol_c))
 
 
+    @staticmethod
+    def guess_atom_element(atom_name) -> str:
+        """
+        Guess the element from an atom name.
+
+        Parameters
+        ----------
+        atom_name :
+
+        Returns
+        -------
+        md.element.Element or None
+        """
+        print("@@@", atom_name, type(atom_name))
+        special_cases = {
+            "FE": "Fe",
+            "ZN": "Zn",
+            "CL": "Cl",
+        }
+        if atom_name in special_cases:
+            return special_cases[atom_name]
+
+        stripped_name = atom_name.strip()
+        if stripped_name and stripped_name[0].isalpha():
+            try:
+                return stripped_name[0]
+            except KeyError:
+                pass
+        return None
+
 try:
     import mdtraj as md
 
@@ -436,7 +466,7 @@ try:
                 md_residue = topology.add_residue(
                         self.residue_name[i], md_chain)
             atom_name = "".join(self.atom_name[i])
-            element = guess_atom_element(atom_name)
+            element = guess_atom_element_mdtraj(atom_name)
             topology.add_atom(atom_name, element, md_residue)
             atom_no_to_idx[self.atom_no[i]] = i
         # create bonds
@@ -452,23 +482,23 @@ try:
     def from_mdtraj_topology(src: md.Topology) -> Self:
         mol = SMolecule()
         mol.num_atoms = src.n_atoms
-        mol.atom_name = np.empty(src.n_atoms, dtype=np.str_)
+        mol.atom_name = np.empty(src.n_atoms, dtype=np.object_)
         mol.atom_no = np.empty(src.n_atoms, dtype=np.int64)
         mol.charge = np.empty(src.n_atoms, dtype=np.float64)
         mol.residue_no = np.empty(src.n_atoms, dtype=np.int64)
-        mol.residue_name = np.empty(src.n_atoms, dtype=np.str_)
-        mol.chain_id = np.empty(src.n_atoms, dtype=np.str_)
+        mol.residue_name = np.empty(src.n_atoms, dtype=np.object_)
+        mol.chain_id = np.empty(src.n_atoms, dtype=np.object_)
         prev_residue = None
         for i, atom in enumerate(src.atoms):
-            mol.atom_name[i] = np.str_(atom.name)
+            mol.atom_name[i] = np.object_(atom.name)
             mol.atom_no[i] = atom.index
             mol.charge[i] = atom.formal_charge
             if prev_residue != atom.residue.index:
                 prev_residue = atom.residue.index
                 mol.num_residues += 1
             mol.residue_no[i] = atom.residue.index
-            mol.residue_name[i] = np.str_(atom.residue.name)
-            mol.chain_id[i] = np.str_(atom.residue.chain.chain_id)
+            mol.residue_name[i] = np.object_(atom.residue.name)
+            mol.chain_id[i] = np.object_(atom.residue.chain.chain_id)
         mol.num_bonds = src.n_bonds
         mol.bond_list = np.empty((src.n_bonds, 2), dtype=np.int64)
         for bond in enumerate(src.bonds):
@@ -479,7 +509,8 @@ try:
 
     SMolecule.from_mdtraj_topology = from_mdtraj_topology
 
-    def guess_atom_element(atom_name) -> md.element.Element:
+    @staticmethod
+    def guess_atom_element_mdtraj(atom_name) -> md.element.Element:
         """
         Guess the element from an atom name.
 
@@ -491,23 +522,15 @@ try:
         -------
         md.element.Element or None
         """
-        special_cases = {
-            "FE": md.element.Element.getBySymbol("Fe"),
-            "ZN": md.element.Element.getBySymbol("Zn"),
-            "CL": md.element.Element.getBySymbol("Cl"),
-        }
-        if atom_name in special_cases:
-            return special_cases[atom_name]
-
-        stripped_name = atom_name.strip()
-        if stripped_name and stripped_name[0].isalpha():
-            try:
-                return md.element.Element.getBySymbol(stripped_name[0])
-            except KeyError:
-                pass
+        try:
+            el = SMolecule.guess_atom_element(atom_name)
+            if el:
+                return md.element.Element.getBySymbol(el)
+        except KeyError:
+            pass
         return None
 
-    SMolecule.guess_atom_element = guess_atom_element
+    SMolecule.guess_atom_element_mdtraj = guess_atom_element_mdtraj
 
 except ImportError:
     pass
@@ -515,8 +538,7 @@ except ImportError:
 
 try:
     import MDAnalysis as mda
-    from MDAnalysis.core.topologyattrs import Atomnames as mdaAtomnames
-    from MDAnalysis.core.topologyattrs import ChainIDs as mdaChainIDs
+    import MDAnalysis.core.topologyattrs as mdaattr
     from MDAnalysis.core.topology import Topology as mdaTopology
 
 
@@ -527,16 +549,26 @@ try:
             MDAnalysis Topology
         -------
         """
+        ids = []
         names = []
         chainids = []
+        elements = []
+        formal_chages = []
         for i in range(0, self.num_atoms):
-            names.append(str(self.atom_name[i]))
+            ids.append(self.atom_no[i])
+            names.append(self.atom_name[i].astype(str))
             chainids.append(str(self.chain_id[i]))
+            elements.append(
+                    SMolecule.guess_atom_element(self.atom_name[i].astype(str)))
+            formal_chages.append(self.charge[i])
 
         attrs = []
         for vals, Attr, dtype in (
-                (names, mdaAtomnames, object),
-                (chainids, mdaChainIDs, object),
+                (ids, mdaattr.Atomids, np.int64),
+                (names, mdaattr.Atomnames, object),
+                (chainids, mdaattr.ChainIDs, object),
+                (elements, mdaattr.Elements, object),
+                (formal_chages, mdaattr.FormalCharges, np.float64),
                 ):
             attrs.append(Attr(np.array(vals, dtype=dtype)))
         top = mdaTopology(
@@ -554,14 +586,14 @@ try:
         mol = SMolecule()
         mol.num_atoms = len(uni.atoms)
 
-        mol.atom_name = np.empty(mol.num_atoms, dtype=np.str_)
+        mol.atom_name = np.empty(mol.num_atoms, dtype=np.object_)
         mol.atom_no = np.empty(mol.num_atoms, dtype=np.int64)
         mol.charge = np.empty(mol.num_atoms, dtype=np.float64)
         mol.residue_no = np.empty(mol.num_atoms, dtype=np.int64)
-        mol.residue_name = np.empty(mol.num_atoms, dtype=np.str_)
-        mol.chain_id = np.empty(mol.num_atoms, dtype=np.str_)
+        mol.residue_name = np.empty(mol.num_atoms, dtype=np.object_)
+        mol.chain_id = np.empty(mol.num_atoms, dtype=np.object_)
         for i, atom in enumerate(uni.atoms):
-            mol.atom_name[i] = np.str_(atom.name)
+            mol.atom_name[i] = atom.name
             mol.atom_no[i] = atom.index
             try:
                 mol.charge[i] = atom.formalcharge
@@ -569,10 +601,10 @@ try:
                 mol.charge[i] = 0.0
             mol.residue_no[i] = atom.residue.resindex
             try:
-                mol.residue_name[i] = np.str_(atom.residue.name)
+                mol.residue_name[i] = atom.residue.name
             except mda.exceptions.NoDataError:
-                mol.residue_name[i] = np.str_('')
-            mol.chain_id[i] = np.str_(atom.chainID)
+                mol.residue_name[i] = ''
+            mol.chain_id[i] = atom.chainID
         try:
             mol.num_bonds = len(uni.bonds)
             mol.bond_list = np.empty((mol.num_bonds, 2), dtype=np.int64)
