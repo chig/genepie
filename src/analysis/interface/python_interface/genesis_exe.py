@@ -2,7 +2,7 @@ import ctypes
 from collections import namedtuple
 import os
 import tempfile
-from typing import Iterable, Optional
+from typing import Iterable, NamedTuple, Optional
 import numpy as np
 import numpy.typing as npt
 from libgenesis import LibGenesis
@@ -905,10 +905,9 @@ def mbar_analysis(
                     ctypes.byref(n_replica), ctypes.byref(n_blocks))
 
 
-KmeansClusteringResult = namedtuple(
-        'KmeansClusteringResult',
-        ['pdb_str',
-         'cluster_idxs'])
+class KmeansClusteringResult(NamedTuple):
+    mol_from_pdb: SMolecule
+    cluster_idxs: npt.NDArray[np.int64]
 
 
 def kmeans_clustering(
@@ -988,14 +987,18 @@ def kmeans_clustering(
                     ctypes.byref(cluster_size),
                     )
             if pdb_c:
-                pdb = c2py_util.conv_string(pdb_c)
+                pdb_str = c2py_util.conv_string(pdb_c)
                 LibGenesis().lib.deallocate_c_string(ctypes.byref(pdb_c))
+                with tempfile.NamedTemporaryFile(dir=os.getcwd(), delete=True) as pdb_file:
+                    pdb_file.write(pdb_str.encode())
+                    pdb_file.seek(0)
+                    pdb_mol = SMolecule.from_file(pdb=pdb_file.name)
             else:
-                pdb = None
+                pdb_mol = None
             cluster_idxs = (c2py_util.conv_int_ndarray(
                     cluster_idxs_c, cluster_size.value)
                             if cluster_idxs_c else None)
-            return KmeansClusteringResult(pdb, cluster_idxs)
+            return KmeansClusteringResult(pdb_mol, cluster_idxs)
     finally:
         if cluster_idxs_c:
             LibGenesis().lib.deallocate_int(

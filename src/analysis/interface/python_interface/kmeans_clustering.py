@@ -31,7 +31,7 @@ def test_kmeans_clustering():
             pbc_correct = "NO",
             ) as trajs:
         for t in trajs:
-            pdb, cluster_idxs = genesis_exe.kmeans_clustering(
+            ret = genesis_exe.kmeans_clustering(
                     mol, t,
                     selection_group = ["an:CA", ],
                     fitting_method = "TR+ROT",
@@ -48,8 +48,8 @@ def test_kmeans_clustering():
                     trjout_type     = "COOR",
                     iseed           = 3141592,
                     )
-            print(pdb)
-            print(cluster_idxs)
+            # print(ret.mol_from_pdb)
+            print(ret.cluster_idxs)
 
 
 def main():
