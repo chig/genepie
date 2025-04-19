@@ -13,8 +13,8 @@ class TestMDTraj(CustomTestCase):
         gtrajs, gmol = self.create_traj_by_genesis(
                 self.TRJ_PATH, pdb=self.PDB_PATH)
         with trj, gtrajs:
-            self.assertEqual(gtrajs[0], trj)
-            self.assertEqual(gmol, mol)
+            self.assertAlmostEqual(gtrajs[0], trj)
+            self.assertAlmostEqual(gmol, mol)
 
     def test_to_mdtraj_trajectory(self):
         strajs, smol = self.create_traj_by_genesis(

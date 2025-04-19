@@ -10,17 +10,22 @@ from s_trajectories import STrajectories, STrajectoriesArray
 
 
 class CustomTestCase(unittest.TestCase):
-
+    """"""
+    TEST_ROOT = pathlib.Path("../../../../tests/regression_test")
     PDB_PATH = pathlib.Path("BPTI_ionize.pdb")
     PSF_PATH = pathlib.Path("BPTI_ionize.psf")
     TRJ_PATH = pathlib.Path("BPTI_run.dcd")
 
-    def assertAlmostEqualNumpyNDArrayFloat(
+    def assertAlmostEqualNumpyNDArray(
             self, expected, actual,
-            rtol: Optional[float] = 1.e-7,
-            atol: Optional[float] = 0,
+            rtol: Optional[float] = None,
+            atol: Optional[float] = None,
             msg: Optional[str] = None,
             ):
+        if rtol is None:
+            rtol = 1.e-7
+        if atol is None:
+            atol = 0
         if not np.allclose(expected, actual, rtol=rtol, atol=atol):
             standard_msg = (f"{expected}.coords != {actual}.coords "
                             + f"within rtol={rtol}, atol={atol}")
@@ -28,25 +33,28 @@ class CustomTestCase(unittest.TestCase):
 
     def assertAlmostEqualSTrajectories(
             self, e_trj: STrajectories, a_trj: STrajectories,
-            rtol: Optional[float] = 1.e-4,
-            atol: Optional[float] = 0,
+            places: Optional[int] = None,
             msg: Optional[str] = None,
-            ):
+            delta: Optional[float] = None):
+        if (places is None) and (delta is None):
+            places = 4
         if (not isinstance(e_trj, STrajectories)
             or not isinstance(a_trj, STrajectories)):
             self.fail("Both arguments must be instances of STrajectories.")
         self.assertEqual(e_trj.natom, a_trj.natom, msg)
         self.assertEqual(e_trj.nframe, a_trj.nframe, msg)
-        self.assertAlmostEqualNumpyNDArrayFloat(
-                e_trj.coords, a_trj.coords, rtol=rtol, atol=atol, msg=msg)
-        self.assertAlmostEqualNumpyNDArrayFloat(
-                e_trj.pbc_boxes, a_trj.pbc_boxes, rtol=rtol, atol=atol, msg=msg)
+        self.assertAlmostEqual(
+                e_trj.coords, a_trj.coords, places, msg, delta)
+        self.assertAlmostEqual(
+                e_trj.pbc_boxes, a_trj.pbc_boxes, places, msg, delta)
 
     def assertAlmostEqualSMolecule(
             self, e_mol: STrajectories, a_mol: STrajectories,
-            rtol: Optional[float] = 1.e-4,
-            atol: Optional[float] = 0,
-            msg: Optional[str] = None):
+            places: Optional[int] = None,
+            msg: Optional[str] = None,
+            delta: Optional[float] = None):
+        if (places is None) and (delta is None):
+            places = 4
         self.assertEqual(e_mol.num_deg_freedom, a_mol.num_deg_freedom, msg)
         self.assertEqual(e_mol.num_atoms, a_mol.num_atoms, msg)
         self.assertEqual(e_mol.num_bonds, a_mol.num_bonds, msg)
@@ -56,20 +64,36 @@ class CustomTestCase(unittest.TestCase):
         self.assertEqual(e_mol.num_impropers, a_mol.num_impropers, msg)
         # ...
 
-    def assertEqual(self, expected, actual, msg=None):
-        """
-        Override assertEqual to handle custom types.
-        """
-        if (isinstance(expected, STrajectories)
-            and isinstance(actual, STrajectories)):
+    def assertAlmostEqual(self, expected, actual,
+                          places: Optional[int] = None,
+                          msg: Optional[str] = None,
+                          delta: Optional[float] = None):
+        if isinstance(expected, np.ndarray) and isinstance(actual, np.ndarray):
+            if delta is None:
+                if places is not None:
+                    atol = 10**(-places)
+                else:
+                    atol = None
+            else:
+                atol = delta
+            if (expected.dtype == np.float64) and (actual.dtype == np.float64):
+                self.assertAlmostEqualNumpyNDArray(
+                        expected, actual, rtol=0.0, atol=atol, msg=msg)
+                return
+        elif (isinstance(expected, STrajectories)
+              and isinstance(actual, STrajectories)):
             self.assertAlmostEqualSTrajectories(
-                    expected, actual, rtol=1e-4, atol=1e-4, msg=msg)
+                    expected, actual, places, msg, delta)
+            return
         elif (isinstance(expected, SMolecule)
-            and isinstance(actual, SMolecule)):
+              and isinstance(actual, SMolecule)):
             self.assertAlmostEqualSMolecule(
-                    expected, actual, rtol=1e-4, atol=1e-4, msg=msg)
-        else:
-            super().assertEqual(expected, actual, msg)
+                    expected, actual, places, msg, delta)
+            return
+        if (places is None) and (delta is None):
+            places = 7
+        super().assertAlmostEqual(
+                expected, actual, places, msg, delta)
 
     @staticmethod
     def create_traj_by_genesis(
