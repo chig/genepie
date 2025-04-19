@@ -31,6 +31,35 @@ class CustomTestCase(unittest.TestCase):
                             + f"within rtol={rtol}, atol={atol}")
             self.fail(self._formatMessage(msg, standard_msg))
 
+    def assertObjectsAlmostEqual(self, expected, actual,
+                                 places: Optional[int] = None,
+                                 msg: Optional[str] = None,
+                                 delta: Optional[float] = None,
+                                 except_attr: set[str] = set()):
+            edict = expected.__dict__
+            adict = actual.__dict__
+
+            if msg is not None:
+                msg = msg + " : "
+            else:
+                msg = ""
+            self.assertEqual(set(edict.keys()), set(adict.keys()),
+                             msg + "Object attribute names do not match.")
+            for key in edict:
+                if key in except_attr:
+                    continue
+                ev = edict[key]
+                av = adict[key]
+                if ((isinstance(ev, np.ndarray)
+                     and (ev.dtype == np.float64)
+                     and isinstance(av, np.ndarray)
+                     and (av.dtype == np.float64))
+                    or (isinstance(ev, float) and isinstance(av, float))):
+                    self.assertAlmostEqual(ev, av, places,
+                                           msg + f"{key} is not equal.", delta)
+                else:
+                    self.assertEqual(ev, av, msg + f"{key} is not equal.")
+
     def assertAlmostEqualSTrajectories(
             self, e_trj: STrajectories, a_trj: STrajectories,
             places: Optional[int] = None,
@@ -41,12 +70,12 @@ class CustomTestCase(unittest.TestCase):
         if (not isinstance(e_trj, STrajectories)
             or not isinstance(a_trj, STrajectories)):
             self.fail("Both arguments must be instances of STrajectories.")
-        self.assertEqual(e_trj.natom, a_trj.natom, msg)
-        self.assertEqual(e_trj.nframe, a_trj.nframe, msg)
-        self.assertAlmostEqual(
-                e_trj.coords, a_trj.coords, places, msg, delta)
-        self.assertAlmostEqual(
-                e_trj.pbc_boxes, a_trj.pbc_boxes, places, msg, delta)
+        if msg is not None:
+            msg = msg + " : Strajectories"
+        else:
+            msg = "Strajectories"
+        self.assertObjectsAlmostEqual(e_trj, a_trj, places, msg, delta,
+                                      except_attr={"c_obj", "_mem_owner"})
 
     def assertAlmostEqualSMolecule(
             self, e_mol: STrajectories, a_mol: STrajectories,
@@ -55,14 +84,22 @@ class CustomTestCase(unittest.TestCase):
             delta: Optional[float] = None):
         if (places is None) and (delta is None):
             places = 4
-        self.assertEqual(e_mol.num_deg_freedom, a_mol.num_deg_freedom, msg)
-        self.assertEqual(e_mol.num_atoms, a_mol.num_atoms, msg)
-        self.assertEqual(e_mol.num_bonds, a_mol.num_bonds, msg)
-        self.assertEqual(e_mol.num_enm_bonds, a_mol.num_enm_bonds, msg)
-        self.assertEqual(e_mol.num_angles, a_mol.num_angles, msg)
-        self.assertEqual(e_mol.num_dihedrals, a_mol.num_dihedrals, msg)
-        self.assertEqual(e_mol.num_impropers, a_mol.num_impropers, msg)
-        # ...
+        if (not isinstance(e_mol, SMolecule)
+            or not isinstance(a_mol, SMolecule)):
+            self.fail("Both arguments must be instances of SMolecule.")
+        if msg is not None:
+            msg = msg + " : SMolecule"
+        else:
+            msg = "SMolecule"
+        self.assertObjectsAlmostEqual(
+                e_mol, a_mol, places, msg, delta,
+                except_attr={
+                    "atom_coord", "num_atoms_fep", "num_bonds_fep",
+                    "num_angles_fep", "num_dihedrals_fep", "num_impropers_fep",
+                    "num_cmaps_fep", "bond_list_fep", "angl_list_fep",
+                    "dihe_list_fep", "impr_list_fep", "cmap_list_fep",
+                    "id_singleA", "id_singleB", "fepgrp", "fepgrp_bond",
+                    "fepgrp_angl", "fepgrp_dihe", "fepgrp_cmap"})
 
     def assertAlmostEqual(self, expected, actual,
                           places: Optional[int] = None,
@@ -94,6 +131,15 @@ class CustomTestCase(unittest.TestCase):
             places = 7
         super().assertAlmostEqual(
                 expected, actual, places, msg, delta)
+
+    def assertEqualNdarray(self, expected, actual, msg: str = None):
+        self.assertTrue(np.array_equal(expected, actual), msg=msg)
+
+    def assertEqual(self, expected, actual, msg: str = None):
+        if isinstance(expected, np.ndarray) and isinstance(actual, np.ndarray):
+            self.assertEqualNdarray(expected, actual, msg)
+        else:
+            super().assertEqual(expected, actual, msg)
 
     @staticmethod
     def create_traj_by_genesis(
