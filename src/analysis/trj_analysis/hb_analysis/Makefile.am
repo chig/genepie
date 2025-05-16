@@ -56,10 +56,9 @@ hb_analysis$(EXEEXT) : $(hb_analysis_OBJECTS) \
 	$(FC) -o $(bin_PROGRAMS) $(hb_analysis_OBJECTS) \
 		$(hb_analysis_ADDLIBANA) $(hb_analysis_ADDLIB) $(LDFLAGS)
 
-$(noinst_LIBRARIES) : $(hb_analysis_ADDLIBANA) $(hb_analysis_ADDLIB) \
-	$(hb_analysis_OBJECTS)
-	$(AR) $(ARFLAGS) cr $@ $(hb_analysis_OBJECTS) \
-		$(hb_analysis_ADDLIBANA) $(hb_analysis_ADDLIB)
+$(noinst_LIBRARIES) : $(hb_analysis_OBJECTS)
+	$(AR) $(ARFLAGS) cr $@ $(hb_analysis_OBJECTS)
+
 libhb_analysis.o : ;
 
 depend: clean_depend

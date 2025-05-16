@@ -56,10 +56,9 @@ wham_analysis$(EXEEXT) : $(wham_analysis_ADDLIBANA) $(wham_analysis_ADDLIB) \
 	$(FC) -o $(bin_PROGRAMS) $(wham_analysis_OBJECTS) \
 		$(wham_analysis_ADDLIBANA) $(wham_analysis_ADDLIB) $(LDFLAGS)
 
-$(noinst_LIBRARIES) : $(wham_analysis_ADDLIBANA) $(wham_analysis_ADDLIB) \
-	$(wham_analysis_OBJECTS)
-	$(AR) $(ARFLAGS) cr $@ $(wham_analysis_OBJECTS) \
-		$(wham_analysis_ADDLIBANA) $(wham_analysis_ADDLIB)
+$(noinst_LIBRARIES) : $(wham_analysis_OBJECTS)
+	$(AR) $(ARFLAGS) cr $@ $(wham_analysis_OBJECTS)
+
 libwham_analysis.o : ;
 
 depend: clean_depend

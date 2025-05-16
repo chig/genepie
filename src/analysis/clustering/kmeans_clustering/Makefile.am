@@ -56,10 +56,9 @@ kmeans_clustering$(EXEEXT) : $(kmeans_clustering_ADDLIBANA) $(kmeans_clustering_
 	$(FC) -o $(bin_PROGRAMS) $(kmeans_clustering_OBJECTS) \
 		$(kmeans_clustering_ADDLIBANA) $(kmeans_clustering_ADDLIB) $(LDFLAGS)
 
-$(noinst_LIBRARIES) : $(kmeans_clustering_ADDLIBANA) $(kmeans_clustering_ADDLIB) \
-	$(kmeans_clustering_OBJECTS)
-	$(AR) $(ARFLAGS) cr $@ $(kmeans_clustering_OBJECTS) \
-		$(kmeans_clustering_ADDLIBANA) $(kmeans_clustering_ADDLIB)
+$(noinst_LIBRARIES) : $(kmeans_clustering_OBJECTS)
+	$(AR) $(ARFLAGS) cr $@ $(kmeans_clustering_OBJECTS)
+
 libkmeans_clustering.o : ;
 
 depend: clean_depend

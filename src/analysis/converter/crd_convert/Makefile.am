@@ -56,11 +56,8 @@ crd_convert$(EXEEXT) : $(crd_convert_ADDLIBANA) $(crd_convert_ADDLIB) \
 	$(FC) -o $(bin_PROGRAMS) $(crd_convert_OBJECTS) \
 		$(crd_convert_ADDLIBANA) $(crd_convert_ADDLIB) $(LDFLAGS)
 
-
-$(noinst_LIBRARIES) : $(crd_convert_ADDLIBANA) $(crd_convert_ADDLIB) \
-						$(crd_convert_OBJECTS)
-	$(AR) $(ARFLAGS) cr $@ $(crd_convert_OBJECTS) \
-		$(crd_convert_ADDLIBANA) $(crd_convert_ADDLIB)
+$(noinst_LIBRARIES) : $(crd_convert_OBJECTS)
+	$(AR) $(ARFLAGS) cr $@ $(crd_convert_OBJECTS)
 
 libcrd_convert.o : ;
 

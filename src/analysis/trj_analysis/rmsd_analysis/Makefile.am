@@ -56,10 +56,9 @@ rmsd_analysis$(EXEEXT) : $(rmsd_analysis_OBJECTS) \
 	$(FC) -o $(bin_PROGRAMS) $(rmsd_analysis_OBJECTS) \
 		$(rmsd_analysis_ADDLIBANA) $(rmsd_analysis_ADDLIB) $(LDFLAGS)
 
-$(noinst_LIBRARIES) : $(rmsd_analysis_ADDLIBANA) $(rmsd_analysis_ADDLIB) \
-	$(rmsd_analysis_OBJECTS)
-	$(AR) $(ARFLAGS) cr $@ $(rmsd_analysis_OBJECTS) \
-		$(rmsd_analysis_ADDLIBANA) $(rmsd_analysis_ADDLIB)
+$(noinst_LIBRARIES) : $(rmsd_analysis_OBJECTS)
+	$(AR) $(ARFLAGS) cr $@ $(rmsd_analysis_OBJECTS)
+
 librmsd_analysis.o : ;
 
 depend: clean_depend

@@ -56,10 +56,9 @@ rg_analysis$(EXEEXT) : $(rg_analysis_OBJECTS) \
 	$(FC) -o $(bin_PROGRAMS) $(rg_analysis_OBJECTS) \
 		$(rg_analysis_ADDLIBANA) $(rg_analysis_ADDLIB) $(LDFLAGS)
 
-$(noinst_LIBRARIES) : $(rg_analysis_ADDLIBANA) $(rg_analysis_ADDLIB) \
-	$(rg_analysis_OBJECTS)
-	$(AR) $(ARFLAGS) cr $@ $(rg_analysis_OBJECTS) \
-		$(rg_analysis_ADDLIBANA) $(rg_analysis_ADDLIB)
+$(noinst_LIBRARIES) : $(rg_analysis_OBJECTS)
+	$(AR) $(ARFLAGS) cr $@ $(rg_analysis_OBJECTS)
+
 librg_analysis.o : ;
 
 depend: clean_depend

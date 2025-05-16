@@ -59,10 +59,9 @@ msd_analysis$(EXEEXT) : $(msd_analysis_OBJECTS) \
 	$(FC) -o $(bin_PROGRAMS) $(msd_analysis_OBJECTS) \
 		$(msd_analysis_ADDLIBANA) $(msd_analysis_ADDLIB) $(LDFLAGS)
 
-$(noinst_LIBRARIES) : $(msd_analysis_ADDLIBANA) $(msd_analysis_ADDLIB) \
-	$(msd_analysis_OBJECTS)
-	$(AR) $(ARFLAGS) cr $@ $(msd_analysis_OBJECTS) \
-		$(msd_analysis_ADDLIBANA) $(msd_analysis_ADDLIB)
+$(noinst_LIBRARIES) : $(msd_analysis_OBJECTS)
+	$(AR) $(ARFLAGS) cr $@ $(msd_analysis_OBJECTS)
+
 libmsd_analysis.o : ;
 
 depend: clean_depend

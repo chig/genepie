@@ -56,10 +56,8 @@ trj_analysis$(EXEEXT) : $(trj_analysis_OBJECTS) \
 	$(FC) -o $(bin_PROGRAMS) $(trj_analysis_OBJECTS) \
 		$(trj_analysis_ADDLIBANA) $(trj_analysis_ADDLIB) $(LDFLAGS)
 
-$(noinst_LIBRARIES) : $(trj_analysis_ADDLIBANA) $(trj_analysis_ADDLIB) \
-						$(trj_analysis_OBJECTS)
-	$(AR) $(ARFLAGS) cr $@ $(trj_analysis_OBJECTS) \
-		$(trj_analysis_ADDLIBANA) $(trj_analysis_ADDLIB)
+$(noinst_LIBRARIES) : $(trj_analysis_OBJECTS)
+	$(AR) $(ARFLAGS) cr $@ $(trj_analysis_OBJECTS)
 
 libtrj_analysis.o : ;
 

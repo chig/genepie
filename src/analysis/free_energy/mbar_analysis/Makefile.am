@@ -70,10 +70,9 @@ mbar_analysis$(EXEEXT) : $(mbar_analysis_ADDLIBANA) $(mbar_analysis_ADDLIB) \
 	$(FC) -o $(bin_PROGRAMS) $(mbar_analysis_OBJECTS) \
 		$(mbar_analysis_ADDLIBANA) $(mbar_analysis_ADDLIB) $(LDFLAGS)
 
-$(noinst_LIBRARIES) : $(mbar_analysis_ADDLIBANA) $(mbar_analysis_ADDLIB) \
-	$(mbar_analysis_OBJECTS)
-	$(AR) $(ARFLAGS) cr $@ $(mbar_analysis_OBJECTS) \
-		$(mbar_analysis_ADDLIBANA) $(mbar_analysis_ADDLIB)
+$(noinst_LIBRARIES) : $(mbar_analysis_OBJECTS)
+	$(AR) $(ARFLAGS) cr $@ $(mbar_analysis_OBJECTS)
+
 libmbar_analysis.o : ;
 
 depend: clean_depend

@@ -56,10 +56,9 @@ drms_analysis$(EXEEXT) : $(drms_analysis_OBJECTS) \
 	$(FC) -o $(bin_PROGRAMS) $(drms_analysis_OBJECTS) \
 		$(drms_analysis_ADDLIBANA) $(drms_analysis_ADDLIB) $(LDFLAGS)
 
-$(noinst_LIBRARIES) : $(drms_analysis_ADDLIBANA) $(drms_analysis_ADDLIB) \
-	$(drms_analysis_OBJECTS)
-	$(AR) $(ARFLAGS) cr $@ $(drms_analysis_OBJECTS) \
-		$(drms_analysis_ADDLIBANA) $(drms_analysis_ADDLIB)
+$(noinst_LIBRARIES) : $(drms_analysis_OBJECTS)
+	$(AR) $(ARFLAGS) cr $@ $(drms_analysis_OBJECTS)
+
 libdrms_analysis.o : ;
 
 depend: clean_depend

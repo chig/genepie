@@ -56,10 +56,9 @@ diffusion_analysis$(EXEEXT) : $(diffusion_analysis_OBJECTS) \
 	$(FC) -o $(bin_PROGRAMS) $(diffusion_analysis_OBJECTS) \
 		$(diffusion_analysis_ADDLIBANA) $(diffusion_analysis_ADDLIB) $(LDFLAGS)
 
-$(noinst_LIBRARIES) : $(diffusion_analysis_ADDLIBANA) $(diffusion_analysis_ADDLIB) \
-	$(diffusion_analysis_OBJECTS)
-	$(AR) $(ARFLAGS) cr $@ $(diffusion_analysis_OBJECTS) \
-		$(diffusion_analysis_ADDLIBANA) $(diffusion_analysis_ADDLIB)
+$(noinst_LIBRARIES) : $(diffusion_analysis_OBJECTS)
+	$(AR) $(ARFLAGS) cr $@ $(diffusion_analysis_OBJECTS)
+
 libdiffusion_analysis.o : ;
 
 depend: clean_depend

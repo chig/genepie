@@ -56,10 +56,9 @@ avecrd_analysis$(EXEEXT) : $(avecrd_analysis_ADDLIBANA) $(avecrd_analysis_ADDLIB
 	$(FC) -o $(bin_PROGRAMS) $(avecrd_analysis_OBJECTS) \
 		$(avecrd_analysis_ADDLIBANA) $(avecrd_analysis_ADDLIB) $(LDFLAGS)
 
-$(noinst_LIBRARIES) : $(avecrd_analysis_ADDLIBANA) $(avecrd_analysis_ADDLIB) \
-	$(avecrd_analysis_OBJECTS)
-	$(AR) $(ARFLAGS) cr $@ $(avecrd_analysis_OBJECTS) \
-		$(avecrd_analysis_ADDLIBANA) $(avecrd_analysis_ADDLIB)
+$(noinst_LIBRARIES) : $(avecrd_analysis_OBJECTS)
+	$(AR) $(ARFLAGS) cr $@ $(avecrd_analysis_OBJECTS)
+
 libavecrd_analysis.o : ;
 
 depend: clean_depend
