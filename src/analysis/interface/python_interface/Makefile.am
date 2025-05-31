@@ -14,7 +14,7 @@ SUBDIRS := \
         ../../mode_analysis/avecrd_analysis \
         .
 
-lib_LTLIBRARIES = libpython_interface.la
+noinst_LTLIBRARIES = libpython_interface.la
 
 libpython_interface_la_SOURCES = \
         conv_f_c_util.fpp \

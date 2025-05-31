@@ -19,6 +19,9 @@ SUBDIRS = $(LAPACK_DIR) $(SCALAPACK_DIR) $(QSIMULATE_DIR) $(JSON_FORTRAN_DIR)
 
 lib_LTLIBRARIES = lib.la
 
+install-libLTLIBRARIES:
+	@# Not install lib.la
+
 lib_la_SOURCES = \
 	constants.fpp \
 	mpi_parallel.fpp \

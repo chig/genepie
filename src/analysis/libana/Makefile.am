@@ -11,6 +11,9 @@ SUBDIRS := ../../lib .
 
 lib_LTLIBRARIES = libana.la
 
+install-libLTLIBRARIES:
+	@# Not install libana.la
+
 libana_la_SOURCES = \
 	input_str.fpp \
 	output_str.fpp \
