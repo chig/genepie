@@ -119,7 +119,7 @@ endif
 		$(libpython_interface_la_FCFLAGS) -c $*.f90
 
 depend: clean_depend
-	python $(top_srcdir)/fortdep.py --objext lo *.fpp > $(DEPENDS)
+	python $(top_srcdir)/fortdep.py --objext lo --objprefix libpython_interface_la- *.fpp > $(DEPENDS)
 
 clean_depend:
 	rm -f $(DEPENDS)

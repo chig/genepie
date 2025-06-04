@@ -25,19 +25,19 @@ class FortranFile:
   re_use      = re.compile( r"^(.*;+\s*|\s*)use\s+([^\s,]*)\s*", re.I )
   mod_ext     = ".mod"
 
-  def __init__( self, fname = "", ext = ".o" ):
-    self.setFilename( fname, ext )
+  def __init__( self, fname = "", ext = ".o", prefix = "" ):
+    self.setFilename( fname, ext, prefix )
     self.filename = fname
     self.modules  = []
     self.depmods  = []
 
-  def setFilename( self, fname, ext = ".o" ):
+  def setFilename( self, fname, ext = ".o", prefix = "" ):
     if len(fname) == 0:
       self.filename = ""
       self.objname  = ""
       return
     self.filename = fname
-    self.objname = re.sub( r'\.[a-zA-Z0-9]+$', ext, self.filename )
+    self.objname = prefix + re.sub( r'\.[a-zA-Z0-9]+$', ext, self.filename )
 
   def parse( self ):
     myf = open( self.filename, 'r' )
@@ -100,7 +100,8 @@ def usage( ret = 0 ):
   print( "usage:   fortdep [options] files > [output]", file = sys.stderr )
   print( "options:", file = sys.stderr )
   print( "        -s [static dependencies for obj]", file = sys.stderr )
-  print( "        --objext [object file extension (default o)]", file = sys.stderr )
+  print( "        --objext [object file extension (default: o)]", file = sys.stderr )
+  print( "        --objprefix [object file prefix (default: none)]", file = sys.stderr )
   sys.exit(ret)
 
 
@@ -109,7 +110,7 @@ def main():
 
   # for future extension
   try:
-    opts, args = getopt.getopt( sys.argv[1:], "hs:e:f:", ["objext=", ] )
+    opts, args = getopt.getopt( sys.argv[1:], "hs:e:f:", ["objext=", "objprefix="] )
   except getopt.GetoptError:
     print( "Error, failed to parse options", file = sys.stderr )
     sys.exit(1)
@@ -118,12 +119,15 @@ def main():
     usage()
 
   obj_ext = ".o"
+  obj_prefix = ""
   # parse opts
   for o,a in opts:
     if o in ( "-s" ):
       static_deps = a
     elif o in ( "--objext" ):
       obj_ext = "." + a
+    elif o in ( "--objprefix" ):
+      obj_prefix = a
     elif o in ( "-h" ):
       usage()
 
@@ -131,7 +135,7 @@ def main():
   mods_in_this_dir = []
   # build a list of modules
   for f in args:
-    ff = FortranFile( f, ext=obj_ext )
+    ff = FortranFile( f, ext=obj_ext, prefix=obj_prefix )
     ff.parse()
     files.append( ff )
     mods = ff.getMyModuleFilenames()
@@ -139,7 +143,7 @@ def main():
       mods_in_this_dir.append( m )
 
   # unique
-  mods_in_this_dir = list(set(mods_in_this_dir))
+  mods_in_this_dir = sorted(set(mods_in_this_dir))
 
   ## for debug
   #for ff in files:
