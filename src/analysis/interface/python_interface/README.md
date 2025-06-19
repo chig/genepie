@@ -39,6 +39,9 @@ $ brew install uv
 $ uv venv --python=python3.11
 $ source .venv/bin/activate
 (genesis) $ uv pip install torch torchvision torchaudio nglview numpy mdtraj MDAnalysis plotly jupyterlab py3Dmol scikit-learn
+
+# if you want to deactivate the virtual environment, use the following command
+# (genesis) $ deactivate
 ```
 
 To avoid module name conflicts between mbar_analysis and msd_analysis, generate files with replaced module names related to mbar_analysis in `src/analysis/interface/mbar_analysis` (required before automake etc.)
