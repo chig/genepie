@@ -2,23 +2,28 @@
 
 # Contents
 
-* Required Environment
-* Download and Compilation Method
-* Chignolin Data Download
-* Jupyter Notebook Execution
-* Regression Test Execution
-* Directory and File Structure
+* Required environment
+* Download and compile source code
+* Download chignolin data
+* Jupyter notebook
+* Regression test
+* Python script editing
+* Folder and file description
 
-# Required Environment
+# Required environment
 
 ```
 gfortran 10 (GCC 10) or later is supported
-uv (please perform all calculation within a uv virtual environment)
+uv
+autoconf
+automake
+libtool
+wget
 ```
 
-# Download and Compilation Method
+# Download and compile source code
 
-* Download GENESIS from github and switch to the working branch develop
+Download GENESIS code from GitHub and switch to the working branch `develop`.
 
 ```
 $ git clone https://github.com/matsunagalab/genesis.git
@@ -26,42 +31,45 @@ $ cd genesis/
 $ git checkout develop
 ```
 
-* Python Environment
+Constrct a virtual environment for python by using `uv`. In the following, please use the following virtual environment.
 
 ```
 $ brew install uv
 $ uv venv --python=python3.11
 $ source .venv/bin/activate
-$ uv pip install torch torchvision torchaudio nglview numpy mdtraj MDAnalysis plotly jupyterlab py3Dmol scikit-learn
+(genesis) $ uv pip install torch torchvision torchaudio nglview numpy mdtraj MDAnalysis plotly jupyterlab py3Dmol scikit-learn
 ```
 
-* To avoid module name conflicts between mbar_analysis and msd_analysis, generate files with replaced module names related to mbar_analysis in src/analysis/interface/mbar_analysis (required before automake etc.)
+To avoid module name conflicts between mbar_analysis and msd_analysis, generate files with replaced module names related to mbar_analysis in `src/analysis/interface/mbar_analysis` (required before automake etc.)
 
 ```
 $ cd src/analysis/interface/python_interface
 $ python mbar_rename.py
-$ cd -
 ```
 
-* When installing GENESIS, the Python interface is also compiled simultaneously (LAPACK is required).
+Compile GENESIS. The Python interface is also compiled simultaneously (LAPACK is required for GENESIS).
 
 ```
-# In case of Mac
-$ brew install automake libtool
+# autoconf, automake, and libtool are required.
+# In case of Mac, you can install them by the following command.
+$ brew install autoconf automake libtool
 
-$ cd /path/to/genesis/
-$ autoscan
-$ autoheader
-$ mkdir m4
-$ aclocal
-$ autoconf
-$ libtoolize #In case of Mac, use `glibtoolize` instead of `libtoolize`
-$ automake -a
-$ ./configure LAPACK_LIBS="-L/usr/local/lib -llapack -lblas" # In case of Mac, please set CC=gcc-14 or CC=gcc-15 or other GNU gcc
-$ make
-$ make install
+(genesis) $ cd /path/to/genesis/
+(genesis) $ autoscan
+(genesis) $ autoheader
+(genesis) $ mkdir m4
+(genesis) $ aclocal
+(genesis) $ autoconf
+(genesis) $ libtoolize #In case of Mac, please use `glibtoolize` instead of `libtoolize`
+(genesis) $ automake -a
+(genesis) $ ./configure LAPACK_LIBS="-L/usr/local/lib -llapack -lblas"
+# In case of Mac, please use GNU gcc by specifying CC=gcc-14 or CC=gcc-15 other verions
+# e.g, $ CC=gcc-14 ./configure LAPACK_LIBS="-L/usr/local/lib -llapack -lblas"
+(genesis) $ make
+(genesis) $ make install
 
-genesis) yasu@r1$:genesis$ ls bin
+# Check the compiled binaries in `bin/`
+(genesis) $ ls bin/
 atdyn*                 drms_analysis*         kmeans_clustering*     pmf_analysis*          rmsd_analysis*
 avecrd_analysis*       dssp_interface*        lipidthick_analysis*   prjcrd_analysis*       rpath_generator*
 cg_convert*            eigmat_analysis*       mbar_analysis*         qmmm_generator*        rst_convert*
@@ -71,45 +79,45 @@ crd_convert*           flccrd_analysis*       msd_analysis*          rdf_analysi
 density_analysis*      fret_analysis*         pathcv_analysis*       remd_convert*          tilt_analysis*
 diffusion_analysis*    hb_analysis*           pcavec_drawer*         rg_analysis*           trj_analysis*
 distmat_analysis*      hbond_analysis*        pcrd_convert*          ring_analysis*         wham_analysis*
-(genesis) yasu@r1$:genesis$ 
-(genesis) yasu@r1$:genesis$ 
-(genesis) yasu@r1$:genesis$ ls lib
+
+# Check the compiled libraries in `bin/`
+(genesis) $ ls lib/
 libpython_interface.la* libpython_interface.so*
-(genesis) yasu@r1$:genesis$ 
 
+# Set environment variables
+(genesis) $ cd /path/to/genesis/lib/
+(genesis) $ export LD_LIBRARY_PATH=$(pwd):$LD_LIBRARY_PATH
 
-# Environment variables
-$ cd /path/to/genesis/lib/
-$ export LD_LIBRARY_PATH=$(pwd):$LD_LIBRARY_PATH
-$ cd ../src/analysis/interface/python_interface/
-$ export PYTHONPATH=$(pwd):$PYTHONPATH
-$ cd /path/to/genesis/
-$ export PATH=/path/to/genesis/.venv/bin:$PATH
+(genesis) $ cd /path/to/genesis/src/analysis/interface/python_interface/
+(genesis) $ export PYTHONPATH=$(pwd):$PYTHONPATH
+
+(genesis) $ cd /path/to/genesis/
+(genesis) $ export PATH=/path/to/genesis/.venv/bin:$PATH
 ```
 
-# Chignolin Data Download
+# Download chignolin data
 
 ```
-$ cd /path/to/genesis/demo/
-$ brew install wget
-$ wget --no-check-certificate 'https://drive.google.com/uc?export=download&id=1-aThTB9Qtka8exHQTIDnZGf-IZXx75XE' -O chignolin.pdb
-$ wget --no-check-certificate 'https://drive.google.com/uc?export=download&id=1spt4dX3OWDZdG84i7RNSpShuh-dvCE3c' -O chignolin.dcd
-$ wget --no-check-certificate 'https://drive.google.com/uc?export=download&id=1771QgNhVCqwxz8Fg23h5J3v8HX7oC87R' -O chignolin.psf
+(genesis) $ cd /path/to/genesis/demo/
+(genesis) $ brew install wget
+(genesis) $ wget --no-check-certificate 'https://drive.google.com/uc?export=download&id=1-aThTB9Qtka8exHQTIDnZGf-IZXx75XE' -O chignolin.pdb
+(genesis) $ wget --no-check-certificate 'https://drive.google.com/uc?export=download&id=1spt4dX3OWDZdG84i7RNSpShuh-dvCE3c' -O chignolin.dcd
+(genesis) $ wget --no-check-certificate 'https://drive.google.com/uc?export=download&id=1771QgNhVCqwxz8Fg23h5J3v8HX7oC87R' -O chignolin.psf
 ```
 
-# Jupyter Notebook Execution
+# Jupyter notebook
 
 ```
-$ cd /path/to/genesis/demo/
-$ jupyter-lab
-# Open demo.ipynb in JupyterLab
+(genesis) $ cd /path/to/genesis/demo/
+(genesis) $ jupyter-lab
+# Open demo.ipynb in JupyterLab and let's execte cells!
 ```
 
-# Regression Test Execution
+# Regression test
 
 ```
-$ cd /path/to/genesis/src/analysis/interface/python_interface/
-$ ./all_run.sh
+(genesis) $ cd /path/to/genesis/src/analysis/interface/python_interface/
+(genesis) $ ./all_run.sh
 ```
 
 The contents of all_run.sh are as follows. It executes all regression tests.
@@ -135,17 +143,15 @@ python test_mdanalysis.py
 python test_mdtraj.py
 ```
 
-Or when you want to run individual analysis tools, for example
+Test for individual analysis tools can be called, for example
 
 ```
-$ python rmsd_analysis.py
+(genesis) $ python rmsd_analysis.py
 ```
 
-etc.
+## Python script editing
 
-## Python Script Editing
-
-Edit as needed. For example, in the case of rmsd_analysis.py
+For example, in the case of rmsd_analysis.py
 * Write the path to PDB/PSF files for generating s_molecule: pdb_path / psf_path
 * Write the keywords (from inp file) for crd_convert execution to generate s_trajectory in the arguments of crd_convert
 * Write the keywords (from inp file) for analysis in the arguments of trj_analysis
@@ -205,14 +211,15 @@ if __name__ == "__main__":
     main()
 ```
 
-* The trj_analysis.py script implements regression tests using the CustomTestCase class, so the keywords for crd_convert are written in custom_test_case.py.
+The `trj_analysis.py` script implements regression tests using the CustomTestCase class, so the keywords for crd_convert are written in `custom_test_case.py`.
 
-# Directory and File Structure
+# Folder and file description
 
-## Directories
+## Folders
 
-* All files exist in genesis/src/analysis/interface/python_interface (explained below)
-* Files with changed module names related to mbar_analysis created by mbar_rename.py exist in genesis/src/analysis/interface/mbar_analysis (content description omitted as only module names were changed)
+All files exist in `genesis/src/analysis/interface/python_interface`.
+
+Files with changed module names related to mbar_analysis created by `mbar_rename.py` exist in `genesis/src/analysis/interface/mbar_analysis` (content description omitted as only module names were changed)
 
 ## Files
 
