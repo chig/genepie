@@ -61,7 +61,7 @@ $ make
 $ make install
 
 # Environment variables
-$ cd lib/
+$ cd /path/to/genesis/lib/
 $ export LD_LIBRARY_PATH=$(pwd):$LD_LIBRARY_PATH
 $ cd ../src/analysis/interface/python_interface/
 $ export PYTHONPATH=$(pwd):$PYTHONPATH
@@ -71,6 +71,7 @@ $ cd ../../..
 # Chignolin Data Download
 
 ```
+$ cd /path/to/genesis/
 $ brew install wget
 $ wget --no-check-certificate 'https://drive.google.com/uc?export=download&id=1-aThTB9Qtka8exHQTIDnZGf-IZXx75XE' -O chignolin.pdb
 $ wget --no-check-certificate 'https://drive.google.com/uc?export=download&id=1spt4dX3OWDZdG84i7RNSpShuh-dvCE3c' -O chignolin.dcd
@@ -79,14 +80,15 @@ $ wget --no-check-certificate 'https://drive.google.com/uc?export=download&id=1s
 # Jupyter Notebook Execution
 
 ```
+$ cd /path/to/genesis/
 $ .venv/bin/jupyterlab
-# Open demo.ipynb
+# Open demo.ipynb in JupyterLab
 ```
 
 # Regression Test Execution
 
 ```
-$ cd genesis/src/analysis/interface/python_interface
+$ cd /path/to/genesis/src/analysis/interface/python_interface/
 $ ./all_run.sh
 ```
 
