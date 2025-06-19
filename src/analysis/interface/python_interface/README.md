@@ -13,6 +13,7 @@
 
 ```
 gfortran 10 (GCC 10) or later is supported
+uv (please perform all calculation within a uv virtual environment)
 ```
 
 # Download and Compilation Method
