@@ -45,13 +45,16 @@ $ cd -
 * When installing GENESIS, the Python interface is also compiled simultaneously (LAPACK is required).
 
 ```
+(In case of Mac)
+$ brew install automake libtool
+
 $ cd /path/to/genesis/
 $ autoscan
 $ autoheader
 $ mkdir m4
 $ aclocal
 $ autoconf
-$ libtoolize
+$ libtoolize #In case of Mac, use `glibtoolize`
 $ automake -a
 $ ./configure LAPACK_LIBS="-L/usr/local/lib -llapack -lblas"
 $ make
