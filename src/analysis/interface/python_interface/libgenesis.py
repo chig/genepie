@@ -1,8 +1,8 @@
 import ctypes
 import os
 import threading
-from .s_molecule_c import SMoleculeC
-from .s_trajectories_c import STrajectoriesC
+from s_molecule_c import SMoleculeC
+from s_trajectories_c import STrajectoriesC
 
 class LibGenesis:
     """singleton

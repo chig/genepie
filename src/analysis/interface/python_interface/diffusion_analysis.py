@@ -1,4 +1,4 @@
-from . import genesis_exe
+import genesis_exe
 import numpy as np
 
 
