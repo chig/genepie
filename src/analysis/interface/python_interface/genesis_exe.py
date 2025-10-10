@@ -14,6 +14,7 @@ import ctrl_files
 import c2py_util
 import py2c_util
 
+_DEFALT_MSG_LEN = 2048
 
 @contextmanager
 def suppress_stdout():
@@ -620,9 +621,29 @@ def hb_analysis(molecule: SMolecule, trajs: STrajectories,
     Returnsu:
         result
     """
+    if ana_period is None:
+        ana_period = 1
+    lib = LibGenesis().lib
+    result = ctypes.c_void_p(None)
     mol_c = None
     ana_period_c = ctypes.c_int(ana_period)
-    result = ctypes.c_void_p(None)
+
+    try:
+        lib.hb_analysis_c.argtyes = [
+            ctypes.POINTER(type(molecule.to_SMoleculeC())),
+            ctypes.POINTER(type(trajs.get_c_obj())),
+            ctypes.POINTER(ctypes.c_int),
+            ctypes.c_char_p,
+            ctypes.POINTER(ctypes.c_void_p),
+            ctypes.POINTER(ctypes.c_int),
+            ctypes.c_char_p,
+            ctypes.c_int,
+        ]
+        lib.hb_analysis_c.restype = None
+        _has_status_msg = True
+    except Exception:
+        _has_status_msg = False
+
     try:
         mol_c = molecule.to_SMoleculeC()
         with tempfile.NamedTemporaryFile(dir=os.getcwd(), delete=True) as ctrl:
@@ -645,20 +666,47 @@ def hb_analysis(molecule: SMolecule, trajs: STrajectories,
                     hda_angle=hda_angle,
                     )
 
+            ctrl.flush()
             ctrl.seek(0)
-            with suppress_stdout_simple():
-                LibGenesis().lib.hb_analysis_c(
-                        ctypes.byref(mol_c),
-                        ctypes.byref(trajs.get_c_obj()),
-                        ctypes.byref(ana_period_c),
-                        py2c_util.pathlike_to_byte(ctrl.name),
-                        ctypes.byref(result),
-                        )
+
+            ctrl_path = py2c_util.pathlike_to_byte(ctrl.name)
+            if _has_status_msg:
+                msgbuf, MSG_LEN = make_msgbuf()
+                status = ctypes.c_int(0)
+
+                with suppress_stdout_simple():
+                    lib.hb_analysis_c(
+                            ctypes.byref(mol_c),
+                            ctypes.byref(trajs.get_c_obj()),
+                            ctypes.byref(ana_period_c),
+                            ctrl_path,
+                            ctypes.byref(result),
+                            ctypes.byref(status),
+                            msgbuf,
+                            ctypes.c_int(MSG_LEN),
+                            )
+
+                if status.value  != 0:
+                    raise RuntimeError(msgbuf.value.decode("utf-8","replace"))
+            else:
+                with suppress_stdout_simple():
+                    lib.hb_analysis_c(
+                            ctypes.byref(mol_c),
+                            ctypes.byref(trajs.get_c_obj()),
+                            ctypes.byref(ana_period_c),
+                            ctrl_path,
+                            ctypes.byref(result),
+                            )
+
         s = c2py_util.conv_string(result)
         return s
+
     finally:
         if result:
-            LibGenesis().lib.deallocate_c_string(ctypes.byref(result))
+            try:
+                lib.deallocate_c_string(ctypes.byref(result))
+            except Exception:
+                pass
 
 
 def diffusion_analysis(msd_data: npt.NDArray[np.float64],
@@ -742,9 +790,29 @@ def avecrd_analysis(
     Returns:
         (pdb,)
     """
+    if ana_period is None:
+        ana_period = 1
     mol_c = None
-    pdb_ave_c = ctypes.c_void_p()
+    pdb_ave_c = ctypes.c_void_p(None)
     ana_period_c = ctypes.c_int(ana_period)
+    lib = LibGenesis().lib
+
+    try:
+        lib.aa_analysis_c.argtyes = [
+            ctypes.POINTER(type(molecule.to_SMoleculeC())),
+            ctypes.POINTER(type(trajs.get_c_obj())),
+            ctypes.POINTER(ctypes.c_int),
+            ctypes.c_char_p,
+            ctypes.POINTER(ctypes.c_void_p),
+            ctypes.POINTER(ctypes.c_int),
+            ctypes.c_char_p,
+            ctypes.c_int,
+        ]
+        lib.aa_analysis_c.restype = None
+        _has_status_msg = True
+    except Exception:
+        _has_status_msg = False
+
     try:
         mol_c = molecule.to_SMoleculeC()
         with tempfile.NamedTemporaryFile(dir=os.getcwd(), delete=True) as ctrl:
@@ -762,27 +830,48 @@ def avecrd_analysis(
                     num_iterations=num_iterations,
                     analysis_atom=analysis_atom,
                     )
-
+            ctrl.flush()
             ctrl.seek(0)
-            with suppress_stdout_simple():
-                LibGenesis().lib.aa_analysis_c(
-                        ctypes.byref(mol_c),
-                        ctypes.byref(trajs.get_c_obj()),
-                        ctypes.byref(ana_period_c),
-                        py2c_util.pathlike_to_byte(ctrl.name),
-                        ctypes.byref(pdb_ave_c),
-                        )
+
+            ctrl_path = py2c_util.pathlike_to_byte(ctrl.name)
+            if _has_status_msg:
+                msgbuf, MSG_LEN = make_msgbuf()
+                status = ctypes.c_int(0)
+
+                with suppress_stdout_simple():
+                   lib.aa_analysis_c(
+                            ctypes.byref(mol_c),
+                            ctypes.byref(trajs.get_c_obj()),
+                            ctypes.byref(ana_period_c),
+                            ctrl_path,
+                            ctypes.byref(pdb_ave_c),
+                            ctypes.byref(status),
+                            msgbuf,
+                            ctypes.c_int(MSG_LEN),
+                            )
+                if status.value  != 0:
+                    raise RuntimeError(msgbuf.value.decode("utf-8","replace"))
+            else:
+                with suppress_stdout_simple():
+                    lib.aa_analysis_c(
+                            ctypes.byref(mol_c),
+                            ctypes.byref(trajs.get_c_obj()),
+                            ctypes.byref(ana_period_c),
+                            ctrl_path,
+                            ctypes.byref(pdb_ave_c),
+                            )
+
             if pdb_ave_c:
                 pdb_ave = c2py_util.conv_string(pdb_ave_c)
-                LibGenesis().lib.deallocate_c_string(ctypes.byref(pdb_ave_c))
+                lib.deallocate_c_string(ctypes.byref(pdb_ave_c))
             else:
                 pdb_ave = None
             return AvecrdAnalysisResult(pdb_ave)
     finally:
         if mol_c:
-            LibGenesis().lib.deallocate_s_molecule_c(ctypes.byref(mol_c))
+            lib.deallocate_s_molecule_c(ctypes.byref(mol_c))
         if pdb_ave_c:
-            LibGenesis().lib.deallocate_c_string(ctypes.byref(pdb_ave_c))
+            lib.deallocate_c_string(ctypes.byref(pdb_ave_c))
     return None
 
 
@@ -1126,3 +1215,19 @@ def extract_model_blocks(pdb_string):
 
         else:
             i += 1  # 次の文字へ進む
+
+@lru_cache(maxsize=1)
+def get_msg_len(lib) -> int:
+    try:
+        LibGenesis().lib.fi_msg_len.restype=ctypes.c_int
+        n = int(libGenesis().lib.fi_msg_len())
+        if n > 0:
+            return n
+    except Exception:
+        pass
+
+     return _DEFALT_MSG_LEN
+
+def make_msgbuf():
+    n = get_msg_len()
+    return ctypes.create_string_buffer(n), n
