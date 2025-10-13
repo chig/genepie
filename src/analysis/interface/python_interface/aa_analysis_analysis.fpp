@@ -218,7 +218,8 @@ contains
 
     if (output%pdb_avefile /= '') then
       call export_molecules(molecule, option%analysis_atom, pdb_out)
-      call write_pdb_to_string(out_pdb_ave, pdb_out)
+      call write_pdb_to_string(out_pdb_ave, pdb_out, err)
+      if (error_has(err)) return
       call dealloc_pdb_all(pdb_out)
     end if
 

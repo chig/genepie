@@ -127,6 +127,7 @@ contains
     numr => molecule%residue_no
     seg  => molecule%segment_name
 
+    if (error_has(err)) return
 
     ! check option
     !
@@ -581,7 +582,6 @@ contains
          "Setup_HB_partner_List> ERROR: non-polar atom is included")
          return
       endif
-!        call error_msg('Setup_HB_partner_List> ERROR: non-polar atom is included')
 
       if (molecule%residue_no(atom_no) /= pre_resno) then
         i_polar = 0
