@@ -21,7 +21,7 @@ jobs:
             arch: x86_64
           - os: macos-latest
             arch: arm64
-          - os: macos-13
+          - os: macos-15
             arch: x86_64
     runs-on: ${{ matrix.os }}
 
@@ -43,8 +43,12 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           brew install gcc lapack autoconf automake libtool
-          # Create symlink for gfortran (Homebrew installs as gfortran-14)
-          sudo ln -sf $(brew --prefix)/bin/gfortran-14 /usr/local/bin/gfortran || true
+          # Create symlink for gfortran (Homebrew installs versioned, e.g., gfortran-14 or gfortran-15)
+          GFORTRAN=$(ls $(brew --prefix)/bin/gfortran-* 2>/dev/null | sort -V | tail -1)
+          if [ -n "$GFORTRAN" ]; then
+            sudo ln -sf "$GFORTRAN" /usr/local/bin/gfortran
+            echo "Linked gfortran: $GFORTRAN"
+          fi
 
       - name: Generate configure script
         run: |
@@ -55,8 +59,10 @@ jobs:
           if [[ "${{ runner.os }}" == "Linux" ]]; then
             ./configure --disable-mpi CC=gcc FC=gfortran LAPACK_LIBS="-llapack -lblas"
           else
-            # macOS - need to explicitly set FC=gfortran
-            ./configure --disable-mpi CC=gcc-14 FC=gfortran LAPACK_LIBS="-L$(brew --prefix lapack)/lib -llapack -lblas"
+            # macOS - find the highest versioned gcc
+            GCC=$(ls $(brew --prefix)/bin/gcc-* 2>/dev/null | grep -E 'gcc-[0-9]+$' | sort -V | tail -1)
+            echo "Using GCC: $GCC"
+            ./configure --disable-mpi CC="$GCC" FC=gfortran LAPACK_LIBS="-L$(brew --prefix lapack)/lib -llapack -lblas"
           fi
 
       - name: Build GENESIS
@@ -93,7 +99,7 @@ jobs:
           - os: macos-latest
             arch: arm64
             cibw_archs: arm64
-          - os: macos-13
+          - os: macos-15
             arch: x86_64
             cibw_archs: x86_64
     runs-on: ${{ matrix.os }}
