@@ -168,12 +168,15 @@ jobs:
 
       - name: Prepare package with binaries
         run: |
+          # Restore execute permissions (lost during artifact download)
+          chmod +x genesis-artifacts/* 2>/dev/null || true
+          ls -la genesis-artifacts/
           # Copy shared library to package
           cp genesis-artifacts/libpython_interface.* src/genepie/ || true
           # Copy all binaries (atdyn + analysis tools)
           mkdir -p src/genepie/bin
           for binary in genesis-artifacts/*; do
-            if [ -f "$binary" ] && [ -x "$binary" ] && [[ ! "$binary" =~ \.(so|dylib)$ ]]; then
+            if [ -f "$binary" ] && [[ ! "$binary" =~ \.(so|dylib)$ ]]; then
               cp "$binary" src/genepie/bin/
             fi
           done
