@@ -74,9 +74,9 @@ def load_genesis_lib() -> ctypes.CDLL:
     if p:
         return _load(p)
 
-    # in genepy/.lib
-    p = _find_in_package_dotlib("genepy")
-    tried.append("genepy/.lib/")
+    # in genepie/.lib
+    p = _find_in_package_dotlib("genepie")
+    tried.append("genepie/.lib/")
     if p:
         return _load(p)
 

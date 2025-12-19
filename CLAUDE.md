@@ -40,19 +40,19 @@ pip install -e .
 uv run jupyter lab demo/demo.ipynb
 ```
 
-## PyPI Package (genepy)
+## PyPI Package (genepie)
 
-The package is distributed via PyPI as `genepy`. Users can install with:
+The package is distributed via PyPI as `genepie`. Users can install with:
 
 ```bash
-pip install genepy
+pip install genepie
 ```
 
 ### Package Contents
 
 | Component | Description |
 |-----------|-------------|
-| `genepy` Python package | Python interface with `libpython_interface.so` |
+| `genepie` Python package | Python interface with `libpython_interface.so` |
 | `atdyn` | MD engine (CLI command) |
 | 43 analysis tools | CLI commands (rmsd_analysis, trj_analysis, etc.) |
 
@@ -64,7 +64,7 @@ pip install genepy
 |------|---------|
 | `pyproject.toml` | Package metadata, dependencies, CLI entry points |
 | `setup.py` | Forces platform-specific wheel (not pure Python) |
-| `src/genepy/cli.py` | CLI entry point functions for all binaries |
+| `src/genepie/cli.py` | CLI entry point functions for all binaries |
 | `MANIFEST.in` | Specifies files to include in source distribution |
 
 ### CLI Commands Available After Installation
@@ -230,4 +230,4 @@ with tempfile.NamedTemporaryFile(dir=os.getcwd(), delete=True) as ctrl:
   - `libana/` - Analysis library
   - `interface/python_interface/` - **Main development focus**
   - `trj_analysis/`, `free_energy/`, `mode_analysis/`, etc.
-- `src/genepy/` - Python package for PyPI distribution
+- `src/genepie/` - Python package for PyPI distribution

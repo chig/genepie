@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 """
-Setup script for genepy package.
+Setup script for genepie package.
 
 This setup.py is required to force platform-specific wheel creation
 when bundling pre-built binaries (libpython_interface.so, atdyn).

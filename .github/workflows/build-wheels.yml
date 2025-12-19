@@ -168,19 +168,19 @@ jobs:
       - name: Prepare package with binaries
         run: |
           # Copy shared library to package
-          cp genesis-artifacts/libpython_interface.* src/genepy/ || true
+          cp genesis-artifacts/libpython_interface.* src/genepie/ || true
           # Copy all binaries (atdyn + analysis tools)
-          mkdir -p src/genepy/bin
+          mkdir -p src/genepie/bin
           for binary in genesis-artifacts/*; do
             if [ -f "$binary" ] && [ -x "$binary" ] && [[ ! "$binary" =~ \.(so|dylib)$ ]]; then
-              cp "$binary" src/genepy/bin/
+              cp "$binary" src/genepie/bin/
             fi
           done
-          chmod +x src/genepy/bin/* 2>/dev/null || true
+          chmod +x src/genepie/bin/* 2>/dev/null || true
           # List package contents
-          ls -la src/genepy/
-          ls -la src/genepy/bin/ || true
-          echo "Total binaries: $(ls src/genepy/bin/ | wc -l)"
+          ls -la src/genepie/
+          ls -la src/genepie/bin/ || true
+          echo "Total binaries: $(ls src/genepie/bin/ | wc -l)"
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.21
@@ -195,7 +195,7 @@ jobs:
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: "cp {wheel} {dest_dir}/"
           # Test the wheel with multiple Python versions
           CIBW_TEST_COMMAND: >
-            python -c "import genepy; print('genepy imported successfully')"
+            python -c "import genepie; print('genepie imported successfully')"
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
@@ -235,7 +235,7 @@ jobs:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     environment:
       name: pypi
-      url: https://pypi.org/p/genepy
+      url: https://pypi.org/p/genepie
     permissions:
       id-token: write  # Required for trusted publishing
 
@@ -267,7 +267,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch'
     environment:
       name: testpypi
-      url: https://test.pypi.org/p/genepy
+      url: https://test.pypi.org/p/genepie
     permissions:
       id-token: write
 

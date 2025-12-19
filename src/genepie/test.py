@@ -1,7 +1,7 @@
 import ctypes
 import pathlib
-from genepy import LibGenesis
-from genepy import SMolecule
+from genepie import LibGenesis
+from genepie import SMolecule
 
 
 def test():
