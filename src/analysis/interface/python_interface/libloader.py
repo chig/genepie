@@ -6,7 +6,7 @@ import ctypes
 import os
 from pathlib import Path
 from importlib.resources import files
-from typing import Iterable, Optional
+from typing import Iterable, List, Optional
 
 CANDIDATES: tuple[str, ...] = (
         "libgenesis.so", 
@@ -87,7 +87,7 @@ def load_genesis_lib() -> ctypes.CDLL:
         return _load(p)
 
     # in <repo>/pkg/lib/python_interface/.lib/
-    p = _find_repo_pkg_python_interface_dotlib(__file__)
+    p = _find_pkg_lib_python_interface_dotlib(__file__)
     tried.append("<repo>/pkg/lib/python_interface/.lib/")
     if p:
         return _load(p)
