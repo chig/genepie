@@ -428,3 +428,35 @@ with tempfile.NamedTemporaryFile(dir=os.getcwd(), delete=True) as ctrl:
   - `interface/python_interface/` - **Main development focus**
   - `trj_analysis/`, `free_energy/`, `mode_analysis/`, etc.
 - `src/genepie/` - Python package for PyPI distribution
+
+## Known Issues
+
+### Linux: `undefined symbol: _ZGVdN4v_cos` on WSL/Ubuntu
+
+**Symptom**: When importing genepie, you get:
+```
+OSError: .../libpython_interface.so: undefined symbol: _ZGVdN4v_cos
+```
+
+**Cause**: The `_ZGVdN4v_cos` symbol is from glibc's libmvec (vectorized math library). This happens when the shared library was compiled with GCC auto-vectorization on a machine with AVX support, but libmvec is not in the library search path on the target system.
+
+**Workaround**: Set `LD_PRELOAD` before running Python:
+```bash
+export LD_PRELOAD=/lib/x86_64-linux-gnu/libmvec.so.1:/lib/x86_64-linux-gnu/libm.so.6${LD_PRELOAD:+:$LD_PRELOAD}
+python your_script.py
+```
+
+**Permanent fix (in ~/.bashrc)**:
+```bash
+export LD_PRELOAD=/lib/x86_64-linux-gnu/libmvec.so.1:/lib/x86_64-linux-gnu/libm.so.6${LD_PRELOAD:+:$LD_PRELOAD}
+```
+
+**CI Build fix**: The GitHub Actions workflow now uses `-march=x86-64-v2` instead of `-march=native` and explicitly links `-lmvec -lm` to avoid this issue in future releases.
+
+### Sequential atdyn runs cause segfaults
+
+**Symptom**: Running 6+ atdyn MD simulations in the same Python process causes segfaults.
+
+**Cause**: Fortran global state (PME FFT plans, memory allocations) accumulates across runs.
+
+**Workaround**: Use subprocess isolation for tests (see test_atdyn.py pattern).

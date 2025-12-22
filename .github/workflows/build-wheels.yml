@@ -57,7 +57,12 @@ jobs:
       - name: Configure GENESIS (no MPI)
         run: |
           if [[ "${{ runner.os }}" == "Linux" ]]; then
-            ./configure --disable-mpi CC=gcc FC=gfortran LAPACK_LIBS="-llapack -lblas"
+            # Use portable x86-64-v2 instead of -march=native to avoid libmvec dependencies
+            # that may not be available on all systems. Also explicitly link libmvec and libm.
+            ./configure --disable-mpi CC=gcc FC=gfortran \
+              FCFLAGS="-O3 -ffast-math -march=x86-64-v2 -ffree-line-length-none -fallow-argument-mismatch -fopenmp -fPIC" \
+              LDFLAGS="-fopenmp -lmvec -lm" \
+              LAPACK_LIBS="-llapack -lblas"
           else
             # macOS - find the highest versioned gcc
             GCC=$(ls $(brew --prefix)/bin/gcc-* 2>/dev/null | grep -E 'gcc-[0-9]+$' | sort -V | tail -1)
@@ -69,6 +74,14 @@ jobs:
         run: |
           make -j$(nproc 2>/dev/null || sysctl -n hw.ncpu)
           make install
+
+      - name: Verify library dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          echo "=== Checking shared library dependencies ==="
+          ldd lib/libpython_interface.so || true
+          echo "=== Checking for undefined symbols ==="
+          nm -u lib/libpython_interface.so | head -50 || true
 
       - name: Prepare artifacts
         run: |
