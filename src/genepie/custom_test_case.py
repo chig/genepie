@@ -11,7 +11,7 @@ from .s_trajectories import STrajectories, STrajectoriesArray
 
 class CustomTestCase(unittest.TestCase):
     """"""
-    TEST_ROOT = pathlib.Path("../../../../tests/regression_test")
+    TEST_ROOT = pathlib.Path("../../../tests/regression_test")
     PDB_PATH = pathlib.Path("BPTI_ionize.pdb")
     PSF_PATH = pathlib.Path("BPTI_ionize.psf")
     TRJ_PATH = pathlib.Path("BPTI_run.dcd")

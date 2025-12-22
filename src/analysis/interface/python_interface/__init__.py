@@ -1,21 +1,41 @@
 """
 GENESIS Python Interface
 
-This package provides Python bindings for GENESIS analysis tools.
+This module is deprecated. Please use 'import genepie' instead.
+This wrapper is provided for backward compatibility only.
 """
+import warnings
+warnings.warn(
+    "python_interface is deprecated, use 'import genepie' instead",
+    DeprecationWarning,
+    stacklevel=2
+)
 
-from .s_molecule import SMolecule
-from .s_trajectories import STrajectories, STrajectoriesArray
-from . import genesis_exe
-from .genesis_exe import LibGenesis
-from . import ctrl_files 
+from genepie import (
+    SMolecule,
+    STrajectories,
+    STrajectoriesArray,
+    genesis_exe,
+    LibGenesis,
+    ctrl_files,
+    GenesisError,
+    GenesisFortranError,
+    GenesisValidationError,
+    GenesisMemoryError,
+    GenesisOverflowError,
+)
 
 __version__ = "1.0.0"
 __all__ = [
     "SMolecule",
-    "STrajectories", 
+    "STrajectories",
     "STrajectoriesArray",
-    "genesis_exe", 
-    "LibGenesis", 
+    "genesis_exe",
+    "LibGenesis",
     "ctrl_files",
+    "GenesisError",
+    "GenesisFortranError",
+    "GenesisValidationError",
+    "GenesisMemoryError",
+    "GenesisOverflowError",
 ]

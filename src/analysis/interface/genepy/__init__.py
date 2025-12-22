@@ -1,14 +1,28 @@
-from python_interface.s_molecule import SMolecule
-from python_interface.s_trajectories import STrajectories, STrajectoriesArray
-from python_interface import genesis_exe
-from python_interface.genesis_exe import LibGenesis
-from python_interface import ctrl_files
+"""
+Backward compatibility wrapper for genepy -> genepie.
+Please use 'import genepie' instead of 'import genepy'.
+"""
+import warnings
+warnings.warn(
+    "genepy is deprecated, use 'import genepie' instead",
+    DeprecationWarning,
+    stacklevel=2
+)
+
+from genepie import (
+    SMolecule,
+    STrajectories,
+    STrajectoriesArray,
+    genesis_exe,
+    LibGenesis,
+    ctrl_files,
+)
 
 __all__ = [
     "SMolecule",
-    "STrajectories", 
+    "STrajectories",
     "STrajectoriesArray",
-    "genesis_exe", 
-    "LibGenesis", 
+    "genesis_exe",
+    "LibGenesis",
     "ctrl_files",
 ]
