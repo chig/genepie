@@ -33,10 +33,12 @@ jobs:
 
       - name: Configure GENESIS (no MPI)
         run: |
-          # Disable tree vectorization to avoid libmvec symbols (_ZGVdN4v_cos etc.)
-          # that may not be available on all systems
+          # Avoid libmvec symbols (_ZGVdN4v_cos etc.) by:
+          # 1. Removing -ffast-math (triggers libmvec usage)
+          # 2. Disabling all vectorization
+          # 3. Using basic x86-64 architecture (no AVX)
           ./configure --disable-mpi CC=gcc FC=gfortran \
-            FCFLAGS="-O3 -ffast-math -fno-tree-vectorize -ffree-line-length-none -fallow-argument-mismatch -fopenmp -fPIC" \
+            FCFLAGS="-O2 -march=x86-64 -fno-tree-vectorize -fno-tree-loop-vectorize -fno-tree-slp-vectorize -ffree-line-length-none -fallow-argument-mismatch -fopenmp -fPIC" \
             LDFLAGS="-fopenmp" \
             LAPACK_LIBS="-llapack -lblas"
 
