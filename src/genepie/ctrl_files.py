@@ -22,6 +22,7 @@ def write_ctrl_input(
     logfile: Optional[str] = None,
     enefile: Optional[str] = None,
     msdfile: Optional[str] = None,
+    parfile: Optional[str] = None,
     pathfile: Optional[str] = None,
     pathcvfile: Optional[str] = None,
     pcafile: Optional[str] = None,
@@ -40,6 +41,7 @@ def write_ctrl_input(
     remfile: Optional[str] = None,
     rstfile: Optional[str] = None,
     rtpfile: Optional[str] = None,
+    strfile: Optional[str] = None,
     topfile: Optional[str] = None,
     valfile: Optional[str] = None,
     vecfile: Optional[str] = None,
@@ -74,6 +76,7 @@ def write_ctrl_input(
         "Logfile": logfile,
         "Enefile": enefile,
         "msdfile": msdfile,
+        "Parfile": parfile,
         "pathfile": pathfile,
         "pathcvfile": pathcvfile,
         "pcafile": pcafile,
@@ -92,6 +95,7 @@ def write_ctrl_input(
         "Remfile": remfile,
         "Rstfile": rstfile,
         "Rtpfile": rtpfile,
+        "Strfile": strfile,
         "Topfile": topfile,
         "Valfile": valfile,
         "Vecfile": vecfile,
@@ -112,6 +116,7 @@ def write_ctrl_output(
     ambcrdfile: Optional[str] = None,
     angfile: Optional[str] = None,
     cntfile: Optional[str] = None,
+    dcdfile: Optional[str] = None,
     comangfile: Optional[str] = None,
     comdisfile: Optional[str] = None,
     comtorfile: Optional[str] = None,
@@ -177,6 +182,7 @@ def write_ctrl_output(
         "Ambcrdfile": ambcrdfile,
         "Angfile": angfile,
         "Cntfile": cntfile,
+        "Dcdfile": dcdfile,
         "Comangfile": comangfile,
         "Comdisfile": comdisfile,
         "Comtorfile": comtorfile,
@@ -454,6 +460,9 @@ def write_ctrl_energy(
     gbsa_surf_tens: Optional[float] = None,
     table_density: Optional[float] = None,
     output_style: Optional[str] = None,
+    dispersion_corr: Optional[str] = None,
+    contact_check: Optional[bool] = None,
+    vacuum: Optional[bool] = None,
 ) -> None:
     """Write [ENERGY] section for atdyn."""
     dst.write(b"[ENERGY]\n")
@@ -478,6 +487,9 @@ def write_ctrl_energy(
                  gbsa_surf_tens=gbsa_surf_tens,
                  table_density=table_density,
                  output_style=output_style,
+                 dispersion_corr=dispersion_corr,
+                 contact_check=contact_check,
+                 vacuum=vacuum,
                  )
 
 
