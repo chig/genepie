@@ -5,12 +5,13 @@ if __name__ == "__main__" and __package__ is None:
     sys.path.insert(0, str(pkg_dir.parent.parent))
     __package__ = "genepie.tests"
 # --------------------------------------------
+from .conftest import MSD_DATA
 from .. import genesis_exe
 import numpy as np
 
 
 def test_diffusion_analysis():
-    msd = np.loadtxt("msd.data", dtype=np.float64)
+    msd = np.loadtxt(MSD_DATA, dtype=np.float64)
     assert msd.ndim == 2, "MSD data should be 2D array"
     print(f"MSD data shape: {msd.shape}")
 

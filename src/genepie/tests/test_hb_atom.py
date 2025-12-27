@@ -6,22 +6,19 @@ if __name__ == "__main__" and __package__ is None:
     __package__ = "genepie.tests"
 # --------------------------------------------
 import os
-import pathlib
+from .conftest import RALP_PDB, RALP_PSF, RALP_DCD
 from ..ctrl_files import TrajectoryParameters
 from ..s_molecule import SMolecule
 from .. import genesis_exe
 
 
 def test_hb_analysis_Count_atom():
-    pdb_path = pathlib.Path("RALP_DPPC_run.pdb")
-    psf_path = pathlib.Path("RALP_DPPC.psf")
-
-    mol = SMolecule.from_file(pdb=pdb_path, psf=psf_path)
+    mol = SMolecule.from_file(pdb=RALP_PDB, psf=RALP_PSF)
     trajs, subset_mol =  genesis_exe.crd_convert(
             mol,
             traj_params = [
                 TrajectoryParameters(
-                    trjfile = "RALP_DPPC_run.dcd",
+                    trjfile = str(RALP_DCD),
                     md_step = 10,
                     mdout_period = 1,
                     ana_period = 1,

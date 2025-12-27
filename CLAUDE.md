@@ -298,9 +298,33 @@ except GenesisError as e:
 
 ## Testing
 
-### Running Tests
+### Test Directory Structure
 
-Tests are located in `src/genepie/tests/`. To run tests during development:
+```
+src/genepie/tests/
+├── data/                          # Test data (centralized)
+│   ├── bpti/                      # BPTI test system
+│   │   ├── BPTI_ionize.pdb
+│   │   ├── BPTI_ionize.psf
+│   │   └── BPTI_run.dcd
+│   ├── ralp_dppc/                 # RALP-DPPC test system
+│   │   ├── RALP_DPPC_run.pdb
+│   │   ├── RALP_DPPC.psf
+│   │   └── RALP_DPPC_run.dcd
+│   ├── chignolin/                 # Downloaded from Google Drive (.gitignore)
+│   │   ├── chignolin.pdb
+│   │   ├── chignolin.psf
+│   │   └── chignolin.dcd
+│   ├── molecule.pdb
+│   └── msd.data
+├── conftest.py                    # Path constants for test data
+├── download_test_data.py          # Download chignolin data from Google Drive
+├── test_integration.py            # Comprehensive integration tests (42 tests)
+├── test_*.py                      # Individual analysis tests
+└── all_run.sh                     # Test runner script
+```
+
+### Running Tests
 
 ```bash
 # First, build the Fortran shared library
@@ -309,7 +333,7 @@ make
 # Install genepie in editable mode (if not already done)
 pip install -e .
 
-# Run all analysis tests (16 tests)
+# Run all analysis tests (18 tests)
 cd src/genepie/tests
 ./all_run.sh
 
@@ -320,13 +344,33 @@ python -m genepie.tests.test_mbar_1d
 # etc.
 ```
 
+### Integration Tests
+
+Comprehensive test script (42 tests) covering all major functionality. Requires chignolin test data:
+
+```bash
+# Download chignolin data from Google Drive (first time only)
+python -m genepie.tests.download_test_data
+
+# Run integration tests
+python -m genepie.tests.test_integration
+```
+
+Tests include:
+- SMolecule loading and manipulation
+- crd_convert trajectory loading with selections
+- Analysis functions (trj_analysis, rg_analysis, rmsd_analysis, etc.)
+- Free energy (WHAM) analysis
+- MDTraj/MDAnalysis integration
+- scikit-learn/PyTorch integration
+- Error handling and exception classes
+
 ### ATDYN MD Engine Tests
 
 Tests for the atdyn Python interface covering AMBER, GROMACS, and CHARMM file formats:
 
 ```bash
-cd src/genepie/tests
-python test_atdyn.py
+python -m genepie.tests.test_atdyn
 ```
 
 Currently includes 6 tests:
@@ -339,28 +383,9 @@ Currently includes 6 tests:
 
 **Note**: These tests use subprocess isolation to avoid Fortran global state issues. Each test runs in a separate Python subprocess to ensure clean library state.
 
-### Integration Tests (test_demo.py)
-
-Comprehensive test script (42 tests) covering all major functionality:
-
-```bash
-cd demo
-python test_demo.py
-```
-
-Tests include:
-- SMolecule loading and manipulation
-- crd_convert trajectory loading with selections
-- Analysis functions (trj_analysis, rg_analysis, rmsd_analysis, etc.)
-- Free energy (WHAM) analysis
-- MDTraj/MDAnalysis integration
-- scikit-learn/PyTorch integration
-- Error handling and exception classes
-
 ### Error Handling Tests
 
 ```bash
-cd src/genepie/tests
 python -m genepie.tests.test_error_handling
 ```
 

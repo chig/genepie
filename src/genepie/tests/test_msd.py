@@ -6,22 +6,19 @@ if __name__ == "__main__" and __package__ is None:
     __package__ = "genepie.tests"
 # --------------------------------------------
 import os
-import pathlib
+from .conftest import BPTI_PDB, BPTI_PSF, BPTI_DCD
 from ..ctrl_files import TrajectoryParameters
 from ..s_molecule import SMolecule
 from .. import genesis_exe
 
 
 def test_msd_analysis():
-    pdb_path = pathlib.Path("BPTI_ionize.pdb")
-    psf_path = pathlib.Path("BPTI_ionize.psf")
-
-    mol = SMolecule.from_file(pdb=pdb_path, psf=psf_path)
+    mol = SMolecule.from_file(pdb=BPTI_PDB, psf=BPTI_PSF)
     trajs, subset_mol =  genesis_exe.crd_convert(
             mol,
             traj_params = [
                 TrajectoryParameters(
-                    trjfile = "BPTI_run.dcd",
+                    trjfile = str(BPTI_DCD),
                     md_step = 10000,
                     mdout_period = 1000,
                     ana_period = 1,
