@@ -9,6 +9,9 @@ module conv_f_c_util
   implicit none
   private
 
+  ! Maximum string length for C string operations (avoid huge(0) overflow risk)
+  integer, parameter :: MAX_C_STRING_LEN = 1048576  ! 1MB limit
+
   public :: c2f_string
   public :: cptr_to_fstring
   public :: c2f_string_allocate
@@ -321,54 +324,88 @@ contains
     end if
   end function f2c_double_array_nullcheck
 
-  !> foobar
+  !> Allocate C-compatible boolean array
+  !! Returns c_null_ptr on allocation failure
   type(c_ptr) function allocate_c_bool_array(size) result(c_dst)
     implicit none
     integer, intent(in) :: size
     logical(c_bool), pointer :: buf(:)
+    integer :: ierr
 
-    allocate(buf(size))
+    allocate(buf(size), STAT=ierr)
+    if (ierr /= 0) then
+      c_dst = c_null_ptr
+      return
+    end if
     c_dst = c_loc(buf)
   end function allocate_c_bool_array
 
+  !> Allocate C-compatible integer array
+  !! Returns c_null_ptr on allocation failure
   type(c_ptr) function allocate_c_int_array(size) result(c_dst) &
           bind(C, name="allocate_c_int_array")
     implicit none
     integer(c_int), intent(in) :: size
     integer(c_int), pointer :: buf(:)
+    integer :: ierr
 
-    allocate(buf(size))
+    allocate(buf(size), STAT=ierr)
+    if (ierr /= 0) then
+      c_dst = c_null_ptr
+      return
+    end if
     c_dst = c_loc(buf)
   end function allocate_c_int_array
 
+  !> Allocate C-compatible double array
+  !! Returns c_null_ptr on allocation failure
   type(c_ptr) function allocate_c_double_array(size) result(c_dst) &
           bind(C, name="allocate_c_double_array")
     implicit none
     integer(c_int), intent(in) :: size
     real(c_double), pointer :: buf(:)
+    integer :: ierr
 
-    allocate(buf(size))
+    allocate(buf(size), STAT=ierr)
+    if (ierr /= 0) then
+      c_dst = c_null_ptr
+      return
+    end if
     c_dst = c_loc(buf)
   end function allocate_c_double_array
 
+  !> Allocate C-compatible 2D double array
+  !! Returns c_null_ptr on allocation failure
   type(c_ptr) function allocate_c_double_array2(dim1, dim2) result(c_dst) &
           bind(C, name="allocate_c_double_array2")
     implicit none
     integer(c_int), intent(in) :: dim1
     integer(c_int), intent(in) :: dim2
     real(c_double), pointer :: buf(:,:)
+    integer :: ierr
 
-    allocate(buf(dim1, dim2))
+    allocate(buf(dim1, dim2), STAT=ierr)
+    if (ierr /= 0) then
+      c_dst = c_null_ptr
+      return
+    end if
     c_dst = c_loc(buf)
   end function allocate_c_double_array2
 
+  !> Allocate C-compatible string array
+  !! Returns c_null_ptr on allocation failure
   type(c_ptr) function allocate_c_str_array(size, len_str) result(c_dst)
     implicit none
     integer, intent(in) :: size
     integer, intent(in) :: len_str
     character(kind=c_char), pointer :: buf(:,:)
+    integer :: ierr
 
-    allocate(buf(len_str, size))
+    allocate(buf(len_str, size), STAT=ierr)
+    if (ierr /= 0) then
+      c_dst = c_null_ptr
+      return
+    end if
     c_dst = c_loc(buf)
   end function allocate_c_str_array
 
@@ -544,17 +581,25 @@ contains
     character(kind=c_char), pointer :: f_str(:)
     integer :: i, len_str
 
-    call c_f_pointer(c_str, f_str, [huge(0)])
+    ! Early return if null pointer
+    if (.not. c_associated(c_str)) then
+      return
+    end if
+
+    ! Use safe maximum instead of huge(0) to avoid potential infinite loop
+    call c_f_pointer(c_str, f_str, [MAX_C_STRING_LEN])
 
     if (associated(f_str)) then
-      ! find null end
+      ! find null end with safe upper bound
       len_str = 0
-      do i = 1, huge(0)
+      do i = 1, MAX_C_STRING_LEN
         if (f_str(i) == c_null_char) then
           len_str = i
           exit
         end if
       end do
+      ! If no null terminator found, use max length
+      if (len_str == 0) len_str = MAX_C_STRING_LEN
       call c_f_pointer(c_str, f_str, [len_str])
       deallocate(f_str)
       nullify(f_str)

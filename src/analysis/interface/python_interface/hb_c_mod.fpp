@@ -31,7 +31,22 @@ module hb_c_mod
   use constants_mod
   implicit none
 
+  public :: hb_analysis_c
+  public :: deallocate_hb_results_c
+
+  ! Module-level pointer for results (to be deallocated later)
+  ! This prevents dangling pointer issues when returning from hb_analysis_c
+  character(kind=c_char), pointer, save :: hb_out_text_ptr(:) => null()
+
 contains
+  subroutine deallocate_hb_results_c() bind(C, name="deallocate_hb_results_c")
+    implicit none
+    if (associated(hb_out_text_ptr)) then
+      deallocate(hb_out_text_ptr)
+      nullify(hb_out_text_ptr)
+    end if
+  end subroutine deallocate_hb_results_c
+
   subroutine hb_analysis_c(molecule, s_trajes_c, ana_period, &
                            ctrl_text, ctrl_len, &
                            out_text_ptr, status, msg, msglen) &
@@ -50,9 +65,11 @@ contains
 
     type(s_molecule) :: f_molecule
     character(len=:), allocatable :: out_text_f
-    character(kind=c_char), pointer :: out_text_c(:)
 
     type(s_error) :: err
+
+    ! Clean up previous results if any
+    call deallocate_hb_results_c()
 
     call error_init(err)
     call c2f_s_molecule(molecule, f_molecule)
@@ -67,8 +84,9 @@ contains
     if (msglen > 0) msg(1) = c_null_char
 
     call dealloc_molecules_all(f_molecule)
-    call f2c_string(out_text_f, out_text_c)
-    out_text_ptr = c_loc(out_text_c(1))
+    ! Use module-level save pointer to prevent dangling pointer
+    call f2c_string(out_text_f, hb_out_text_ptr)
+    out_text_ptr = c_loc(hb_out_text_ptr(1))
   end subroutine hb_analysis_c
 
   subroutine hb_analysis_main( &
