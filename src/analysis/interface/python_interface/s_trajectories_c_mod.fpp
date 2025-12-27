@@ -21,6 +21,10 @@ module s_trajectories_c_mod
   public :: deallocate_s_trajectories_c
   public :: deallocate_s_trajectories_c_array
 
+  ! Module-level save pointer for trajectory arrays (to prevent dangling pointer)
+  ! Note: This is NOT thread-safe. GENESIS Python interface is single-threaded only.
+  type(s_trajectories_c), pointer, save :: trajs_array_ptr(:) => null()
+
 contains
 
   subroutine init_empty_s_trajectories_c(trajs, natom, nframe) &
@@ -206,9 +210,20 @@ contains
     implicit none
     integer(c_int), intent(in) :: len
     type(c_ptr), intent(out) :: trajs_array
-    type(s_trajectories_c), pointer :: buf(:)
-    allocate(buf(len))
-    trajs_array = c_loc(buf)
+    integer :: i
+
+    ! Clean up any existing allocation first
+    if (associated(trajs_array_ptr)) then
+      do i = 1, size(trajs_array_ptr)
+        call deallocate_s_trajectories_c(trajs_array_ptr(i))
+      end do
+      deallocate(trajs_array_ptr)
+      nullify(trajs_array_ptr)
+    end if
+
+    ! Use module-level pointer to prevent dangling pointer
+    allocate(trajs_array_ptr(len))
+    trajs_array = c_loc(trajs_array_ptr)
   end subroutine allocate_s_trajectories_c_array
 
   subroutine deallocate_s_trajectories_c_array(trajs_array, len) &
@@ -216,13 +231,16 @@ contains
     implicit none
     type(c_ptr), intent(inout) :: trajs_array
     integer(c_int), intent(in) :: len
-    type(s_trajectories_c), pointer :: buf(:)
     integer :: i
 
-    call C_F_POINTER(trajs_array, buf, [len])
-    do i = 1, len
-      call deallocate_s_trajectories_c(buf(i))
-    end do
-    deallocate(buf)
+    ! Use module-level pointer
+    if (associated(trajs_array_ptr)) then
+      do i = 1, size(trajs_array_ptr)
+        call deallocate_s_trajectories_c(trajs_array_ptr(i))
+      end do
+      deallocate(trajs_array_ptr)
+      nullify(trajs_array_ptr)
+    end if
+    trajs_array = c_null_ptr
   end subroutine deallocate_s_trajectories_c_array
 end module s_trajectories_c_mod

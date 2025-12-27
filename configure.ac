@@ -1002,7 +1002,15 @@ else
       fi
 
     elif test x"${FC_ACT}" = x"gfortran"; then
-      FCFLAGS="-O3 -ffast-math -march=native -ffree-line-length-none"
+      # Use -march=x86-64-v2 on x86_64 Linux for portability, -march=native elsewhere
+      case "$host_cpu-$host_os" in
+        x86_64-linux*)
+          FCFLAGS="-O3 -ffast-math -march=x86-64-v2 -ffree-line-length-none"
+          ;;
+        *)
+          FCFLAGS="-O3 -ffast-math -march=native -ffree-line-length-none"
+          ;;
+      esac
       echo ${FC_GNU_VER}
       if test ${FC_GNU_VER} -gt 100000; then
         if test x"${with_msmpi}" = x"no"; then
@@ -1227,7 +1235,15 @@ else
       CFLAGS="-O3 -axCORE-AVX2   "
 
     elif test x"${CC_ACT}" = x"gcc"; then
-      CFLAGS="-O3 -ffast-math -march=native"
+      # Use -march=x86-64-v2 on x86_64 Linux for portability, -march=native elsewhere
+      case "$host_cpu-$host_os" in
+        x86_64-linux*)
+          CFLAGS="-O3 -ffast-math -march=x86-64-v2"
+          ;;
+        *)
+          CFLAGS="-O3 -ffast-math -march=native"
+          ;;
+      esac
       if test ${FC_GNU_VER} -gt 100000; then
         if test x"${with_msmpi}" = x"no"; then
           CFLAGS+=" -fallow-argument-mismatch"
@@ -1413,7 +1429,12 @@ if test -z "${LDFLAGS}"; then
     LDFLAGS+="-Msmartalloc=huge"
 
   elif test x"${FC_ACT}" = x"gfortran"; then
-    LDFLAGS+=""
+    # Link libmvec on Linux for vectorized math functions (glibc-specific)
+    case "$host_os" in
+      linux*)
+        LDFLAGS+="-lmvec -lm"
+        ;;
+    esac
     #LDFLAGS="-march=native -fuse-linker-plugin"
 
   elif test x"${FC_ACT}" = x"frtpx"; then

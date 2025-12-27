@@ -6,23 +6,33 @@ from .s_molecule_c import SMoleculeC
 from .s_trajectories_c import STrajectoriesC
 
 class LibGenesis:
-    """singleton
+    """Thread-safe singleton for GENESIS library access.
+
+    Note: While the singleton pattern is thread-safe, the underlying
+    Fortran library uses module-level save pointers and is NOT thread-safe.
+    All GENESIS function calls should be made from a single thread.
     """
 
     _instance = None
     _lock = threading.Lock()
 
     def __new__(cls):
-        with cls._lock:
-            if cls._instance is None:
-                cls._instance = super().__new__(cls)
+        # Double-check locking pattern for thread safety
+        if cls._instance is None:
+            with cls._lock:
+                if cls._instance is None:
+                    instance = super().__new__(cls)
+                    instance.lib = load_genesis_lib()
+                    instance._initialized = True
+                    instance._setup_function_signatures()
+                    cls._instance = instance
         return cls._instance
 
     def __init__(self):
-        if getattr(self, "_initialized", False):
-            return
-        self.lib = load_genesis_lib()
-        self._initialized = True
+        # All initialization done in __new__ to avoid race conditions
+        pass
+
+    def _setup_function_signatures(self):
 
         self.lib.define_molecule_from_file.argtypes = [
                 ctypes.c_char_p,
@@ -163,6 +173,9 @@ class LibGenesis:
                 ctypes.c_int,
                 ]
         self.lib.hb_analysis_c.restype = None
+
+        self.lib.deallocate_hb_results_c.argtypes = []
+        self.lib.deallocate_hb_results_c.restype = None
 
         self.lib.aa_analysis_c.argtypes = [
                 ctypes.POINTER(SMoleculeC),

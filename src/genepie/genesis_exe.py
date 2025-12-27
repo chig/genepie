@@ -345,11 +345,10 @@ def rg_analysis(molecule: SMolecule, trajs: STrajectories,
     Returns:
         rg
     """
-    mol_c = molecule.to_SMoleculeC()
     ana_period_c = ctypes.c_int(ana_period)
     result_rg_c = ctypes.c_void_p()
+    mol_c = molecule.to_SMoleculeC()
     try:
-        mol_c = molecule.to_SMoleculeC()
         ctrl = io.BytesIO()
         ctrl_files.write_ctrl_output(
                 ctrl,
