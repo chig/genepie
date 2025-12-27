@@ -7,14 +7,15 @@ from .ctrl_files import TrajectoryParameters
 from . import genesis_exe
 from .s_molecule import SMolecule
 from .s_trajectories import STrajectories, STrajectoriesArray
+from .tests.conftest import BPTI_PDB, BPTI_PSF, BPTI_DCD, TEST_DIR
 
 
 class CustomTestCase(unittest.TestCase):
     """"""
-    TEST_ROOT = pathlib.Path("../../../tests/regression_test")
-    PDB_PATH = pathlib.Path("BPTI_ionize.pdb")
-    PSF_PATH = pathlib.Path("BPTI_ionize.psf")
-    TRJ_PATH = pathlib.Path("BPTI_run.dcd")
+    TEST_ROOT = TEST_DIR.parent.parent.parent / "tests" / "regression_test"
+    PDB_PATH = BPTI_PDB
+    PSF_PATH = BPTI_PSF
+    TRJ_PATH = BPTI_DCD
 
     def assertAlmostEqualNumpyNDArray(
             self, expected, actual,

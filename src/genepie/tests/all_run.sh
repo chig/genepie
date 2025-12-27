@@ -26,3 +26,11 @@ python -m genepie.tests.test_mdtraj "$@"
 python -m genepie.tests.test_error_handling "$@"
 # Note: test_atdyn uses subprocess isolation to avoid Fortran global state issues
 python -m genepie.tests.test_atdyn "$@"
+
+# Integration tests (requires chignolin data downloaded from Google Drive)
+if [ -f "${SCRIPT_DIR}/data/chignolin/chignolin.pdb" ]; then
+    python -m genepie.tests.test_integration "$@"
+else
+    echo "SKIP: test_integration (chignolin data not found)"
+    echo "      Run: python -m genepie.tests.download_test_data"
+fi
