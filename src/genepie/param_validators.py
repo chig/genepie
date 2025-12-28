@@ -139,7 +139,7 @@ def validate_distance_ordering(
     cutoffdist: Optional[float],
     pairlistdist: Optional[float]
 ) -> None:
-    """Validate switchdist < cutoffdist <= pairlistdist.
+    """Validate switchdist <= cutoffdist <= pairlistdist.
 
     Args:
         switchdist: Switch distance for force smoothing
@@ -148,11 +148,14 @@ def validate_distance_ordering(
 
     Raises:
         GenesisValidationError: If distance ordering is invalid
+
+    Note:
+        switchdist == cutoffdist is allowed (disables force switching).
     """
     if switchdist is not None and cutoffdist is not None:
-        if switchdist >= cutoffdist:
+        if switchdist > cutoffdist:
             raise GenesisValidationError(
-                f"switchdist ({switchdist}) must be less than "
+                f"switchdist ({switchdist}) must be <= "
                 f"cutoffdist ({cutoffdist})"
             )
 
