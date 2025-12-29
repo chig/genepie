@@ -44,7 +44,9 @@ jobs:
           python -m genepie.tests.test_avecrd
 
       - name: Run regression tests
+        working-directory: src/genepie/tests
         run: |
+          # Regression tests use relative paths that expect CWD to be src/genepie/tests/
           python -m genepie.tests.test_trj
           python -m genepie.tests.test_wham
           python -m genepie.tests.test_mbar_1d
@@ -106,7 +108,9 @@ jobs:
           python -m genepie.tests.test_avecrd
 
       - name: Run regression tests
+        working-directory: src/genepie/tests
         run: |
+          # Regression tests use relative paths that expect CWD to be src/genepie/tests/
           python -m genepie.tests.test_trj
           python -m genepie.tests.test_wham
           python -m genepie.tests.test_mbar_1d
