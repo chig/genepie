@@ -6,11 +6,24 @@
 
 The `genepie` package provides a Python interface to GENESIS analysis tools and the ATDYN MD engine.
 
+---
+
+## For Users
+
 ### Installation
 
 ```bash
+# From PyPI (coming soon)
 pip install genepie
+
+# Currently available from TestPyPI:
+pip install -i https://test.pypi.org/simple/ genepie
 ```
+
+**Requirements:**
+- Python 3.9+
+- Linux (x86_64) or macOS (arm64, x86_64)
+- glibc 2.28+ for Linux (Ubuntu 20.04+)
 
 ### Quick Start
 
@@ -39,6 +52,17 @@ energies, coords = genesis_exe.run_atdyn_md(
     ensemble="NVT",
     temperature=300.0,
 )
+```
+
+### Testing Your Installation
+
+Run basic tests to verify the installation:
+
+```bash
+python -m genepie.tests.test_rmsd
+python -m genepie.tests.test_crd_convert
+python -m genepie.tests.test_trj
+python -m genepie.tests.test_rg
 ```
 
 ### Available Analysis Functions
@@ -71,28 +95,97 @@ energies, coords = genesis_exe.run_atdyn_md(
 | GROMACS | `grotopfile` | `grocrdfile` | (in grotop) |
 | CHARMM | `psffile` | `pdbfile`/`crdfile` | `parfile`, `strfile` |
 
-## Building from Source
+---
+
+## For Developers
+
+### Installation from Source
 
 ```bash
+# Clone repository
+git clone https://github.com/matsunagalab/genesis.git
+cd genesis
+
 # Set up Python environment
 python -m venv .venv
 source .venv/bin/activate
 pip install numpy
 
-# Build GENESIS
+# Build GENESIS (requires gfortran)
 autoreconf -fi
 ./configure --disable-mpi CC=gcc FC=gfortran
 make -j$(nproc)
 
-# Install Python package
+# Install in editable mode
 pip install -e .
 ```
+
+**macOS additional steps:**
+
+```bash
+# Install dependencies via Homebrew
+brew install gcc lapack autoconf automake libtool
+
+# Configure with Homebrew paths
+./configure --disable-mpi CC=gcc-14 FC=gfortran \
+    LAPACK_LIBS="-L$(brew --prefix lapack)/lib -llapack -lblas"
+```
+
+### Running Tests
+
+```bash
+# Run basic tests (18 tests)
+cd src/genepie/tests
+./all_run.sh
+
+# Or run individual tests
+python -m genepie.tests.test_rmsd
+python -m genepie.tests.test_crd_convert
+python -m genepie.tests.test_wham
+```
+
+**Integration tests (requires additional data download):**
+
+```bash
+# Download chignolin test data (~500 MB)
+python -m genepie.tests.download_test_data
+
+# Run integration tests (42 tests)
+python -m genepie.tests.test_integration
+
+# Run error handling tests (64 tests)
+python -m genepie.tests.test_error_handling
+```
+
+**Optional dependencies for full test coverage:**
+
+```bash
+pip install mdtraj MDAnalysis  # For integration tests
+pip install gdown              # For downloading test data
+```
+
+### Project Structure
+
+```
+genesis/
+├── src/
+│   ├── genepie/           # Python interface (main package)
+│   │   ├── genesis_exe.py # Analysis function wrappers
+│   │   ├── libloader.py   # Shared library loader
+│   │   └── tests/         # Test files and data
+│   ├── atdyn/             # MD engine
+│   └── analysis/          # Analysis tools
+├── CLAUDE.md              # Developer guide for Claude Code
+└── pyproject.toml         # Package configuration
+```
+
+---
 
 ## Documentation
 
 - [GENESIS Website](https://www.r-ccs.riken.jp/labs/cbrt/)
-- [CLAUDE.md](CLAUDE.md) - Developer guide for Claude Code
+- [CLAUDE.md](CLAUDE.md) - Developer guide
 
 ## License
 
-See LICENSE file for details.
+LGPL-3.0-or-later. See LICENSE file for details.
