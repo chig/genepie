@@ -517,43 +517,35 @@ with tempfile.NamedTemporaryFile(dir=os.getcwd(), delete=True) as ctrl:
 
 ## Known Issues
 
-### Linux: `undefined symbol: _ZGVdN4v_cos` on WSL/Ubuntu
+### Ubuntu Version Compatibility
 
-**Symptom**: When importing genepie, you get:
-```
-OSError: .../libpython_interface.so: undefined symbol: _ZGVdN4v_cos
-```
+**Supported Ubuntu versions:**
 
-**Cause**: The `_ZGVdN4v_cos` symbol is from glibc's libmvec (vectorized math library). This happens when the shared library was compiled with GCC auto-vectorization on a machine with SIMD support, but libmvec is not in the library search path on the target system.
+| Ubuntu Version | glibc | Status |
+|---------------|-------|--------|
+| 24.04 LTS | 2.39 | Supported |
+| 22.04 LTS | 2.35 | Supported |
+| 20.04 LTS | 2.31 | Supported |
+| 18.04 LTS | 2.27 | Not supported (glibc too old) |
 
-**Workaround (architecture-specific)**:
+The PyPI wheels require glibc 2.28+ (manylinux_2_28). Ubuntu 18.04 users must build from source.
 
-For x86_64:
+### Linux: `undefined symbol: _ZGVdN4v_cos` (Fixed)
+
+**Status**: This issue has been fixed in the default build configuration.
+
+**Root cause**: The `-ffast-math` compiler flag was triggering GCC's auto-vectorization, which generated calls to glibc's libmvec library (`_ZGVdN4v_cos` and similar symbols).
+
+**Fix**: The `-ffast-math` flag has been removed from the default compiler flags in `configure.ac`. PyPI wheels built after this change will not have this issue.
+
+**If you still encounter this issue** (e.g., with older wheel versions or custom builds with `-ffast-math`):
+
 ```bash
-export LD_PRELOAD=/lib/x86_64-linux-gnu/libmvec.so.1:/lib/x86_64-linux-gnu/libm.so.6${LD_PRELOAD:+:$LD_PRELOAD}
-python your_script.py
-```
-
-For ARM64 (aarch64):
-```bash
-export LD_PRELOAD=/lib/aarch64-linux-gnu/libmvec.so.1:/lib/aarch64-linux-gnu/libm.so.6${LD_PRELOAD:+:$LD_PRELOAD}
-python your_script.py
-```
-
-**Auto-detect script (all architectures)**:
-```bash
+# Workaround for affected systems
 ARCH_DIR=$(gcc -print-multiarch 2>/dev/null || echo "x86_64-linux-gnu")
 export LD_PRELOAD=/lib/${ARCH_DIR}/libmvec.so.1:/lib/${ARCH_DIR}/libm.so.6${LD_PRELOAD:+:$LD_PRELOAD}
 python your_script.py
 ```
-
-**Permanent fix (in ~/.bashrc)**:
-```bash
-ARCH_DIR=$(gcc -print-multiarch 2>/dev/null || echo "x86_64-linux-gnu")
-export LD_PRELOAD=/lib/${ARCH_DIR}/libmvec.so.1:/lib/${ARCH_DIR}/libm.so.6${LD_PRELOAD:+:$LD_PRELOAD}
-```
-
-**CI Build fix**: The GitHub Actions workflow uses portable `-march` flags (x86-64-v2 for x86_64, armv8-a for ARM64) and explicitly links `-lmvec -lm` (when available) to avoid this issue in future releases.
 
 ### Sequential atdyn runs cause segfaults
 

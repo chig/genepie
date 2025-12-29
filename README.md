@@ -27,7 +27,14 @@ uv pip install --index-url https://test.pypi.org/simple/ --extra-index-url https
 **Requirements:**
 - Python 3.9+
 - Linux (x86_64) or macOS (arm64, x86_64)
-- glibc 2.28+ for Linux (Ubuntu 20.04+)
+- glibc 2.28+ for Linux (see table below)
+
+| Ubuntu Version | glibc | Status |
+|---------------|-------|--------|
+| 24.04 LTS | 2.39 | Supported |
+| 22.04 LTS | 2.35 | Supported |
+| 20.04 LTS | 2.31 | Supported |
+| 18.04 LTS | 2.27 | Not supported (build from source) |
 
 ### Testing Your Installation
 
