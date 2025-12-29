@@ -14,9 +14,8 @@ recursive-include src/genepie *.so
 recursive-include src/genepie *.dylib
 recursive-include src/genepie/bin *
 
-# Exclude test files from source distribution
-exclude src/genepie/test*.py
-exclude src/genepie/*_test.py
+# Include test data
+recursive-include src/genepie/tests/data *.pdb *.psf *.dcd *.data
 
 # Exclude compiled Python files
 global-exclude *.pyc
