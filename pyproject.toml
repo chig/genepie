@@ -12,6 +12,7 @@ requires-python = ">=3.9"
 authors = [
     {name = "Yasuhiro Matsunaga"},
     {name = "Chigusa Kobayashi"},
+    {name = "Yuji Sugita"},
     {name = "GENESIS Development Team"},
 ]
 keywords = [
