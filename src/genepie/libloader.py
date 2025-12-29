@@ -4,15 +4,56 @@ from __future__ import annotations
 
 import ctypes
 import os
+import platform
 from pathlib import Path
 from importlib.resources import files
-from typing import Iterable, List, Optional
+from typing import Iterable, List, Optional, Tuple
 
 CANDIDATES: tuple[str, ...] = (
-        "libgenesis.so", 
-        "libpython_interface.so", 
-        "libgenesis.dylib", 
+        "libgenesis.so",
+        "libpython_interface.so",
+        "libgenesis.dylib",
         "genesis.dll")
+
+
+def _get_glibc_version() -> Optional[Tuple[int, int]]:
+    """Get glibc version on Linux systems.
+
+    Returns:
+        Tuple of (major, minor) version numbers, or None if not on Linux/glibc.
+    """
+    if platform.system() != 'Linux':
+        return None
+    try:
+        libc_name, version = platform.libc_ver()
+        if libc_name.lower() == 'glibc' and version:
+            parts = version.split('.')
+            if len(parts) >= 2:
+                return (int(parts[0]), int(parts[1]))
+    except Exception:
+        pass
+    return None
+
+
+def _check_glibc_version(min_major: int = 2, min_minor: int = 28) -> None:
+    """Check if glibc version meets minimum requirements.
+
+    Raises:
+        OSError: If glibc version is too old.
+    """
+    version = _get_glibc_version()
+    if version is None:
+        return  # Not Linux or can't detect - let ctypes handle it
+    major, minor = version
+    if (major, minor) < (min_major, min_minor):
+        raise OSError(
+            f"genepie requires glibc {min_major}.{min_minor}+ "
+            f"(found glibc {major}.{minor}).\n"
+            f"Ubuntu 20.04+ is required. Ubuntu 18.04 is not supported.\n"
+            f"Options:\n"
+            f"  1. Upgrade to Ubuntu 20.04 or later\n"
+            f"  2. Build genepie from source"
+        )
 
 
 def _first_existing(paths: Iterable[str]) -> Optional[str]:
@@ -87,6 +128,8 @@ def _find_in_installed_genepie() -> Optional[Path]:
 
 
 def load_genesis_lib() -> ctypes.CDLL:
+    # Check glibc version first on Linux (manylinux_2_28 wheels require glibc 2.28+)
+    _check_glibc_version()
 
     tried: list[str] = []
 

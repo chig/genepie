@@ -1018,13 +1018,13 @@ else
       # Use portable -march flags on Linux, -march=native elsewhere
       case "$host_cpu-$host_os" in
         x86_64-linux*)
-          FCFLAGS="-O3 -ffast-math -march=x86-64-v2 -ffree-line-length-none"
+          FCFLAGS="-O3 -march=x86-64-v2 -ffree-line-length-none"
           ;;
         aarch64-linux*)
-          FCFLAGS="-O3 -ffast-math -march=armv8-a -ffree-line-length-none"
+          FCFLAGS="-O3 -march=armv8-a -ffree-line-length-none"
           ;;
         *)
-          FCFLAGS="-O3 -ffast-math -march=native -ffree-line-length-none"
+          FCFLAGS="-O3 -march=native -ffree-line-length-none"
           ;;
       esac
       echo ${FC_GNU_VER}
@@ -1254,13 +1254,13 @@ else
       # Use portable -march flags on Linux, -march=native elsewhere
       case "$host_cpu-$host_os" in
         x86_64-linux*)
-          CFLAGS="-O3 -ffast-math -march=x86-64-v2"
+          CFLAGS="-O3 -march=x86-64-v2"
           ;;
         aarch64-linux*)
-          CFLAGS="-O3 -ffast-math -march=armv8-a"
+          CFLAGS="-O3 -march=armv8-a"
           ;;
         *)
-          CFLAGS="-O3 -ffast-math -march=native"
+          CFLAGS="-O3 -march=native"
           ;;
       esac
       if test ${FC_GNU_VER} -gt 100000; then
@@ -1437,7 +1437,7 @@ CFLAGS+=" ${OPT_GPROF}"
 CFLAGS+=" -fPIC"
 
 ## Python interface
-AM_PATH_PYTHON([3.11])
+AM_PATH_PYTHON([3.9])
 
 # LDFLAGS
 if test -z "${LDFLAGS}"; then
