@@ -150,7 +150,6 @@ uv pip install -e .
 # Run individual tests
 python -m genepie.tests.test_rmsd
 python -m genepie.tests.test_crd_convert
-python -m genepie.tests.test_wham
 
 # Run all basic tests (18 tests)
 cd src/genepie/tests
@@ -163,6 +162,14 @@ python -m genepie.tests.test_integration    # 42 tests
 
 # Error handling tests
 python -m genepie.tests.test_error_handling # 64 tests
+
+# Regression tests (compare with reference values)
+# These tests use data in tests/regression_test/
+python -m genepie.tests.test_trj
+python -m genepie.tests.test_wham
+python -m genepie.tests.test_mbar_1d
+python -m genepie.tests.test_mbar_block
+python -m genepie.tests.test_atdyn
 ```
 
 ### Project Structure
