@@ -22,7 +22,7 @@ autoreconf -fi
 make -j$(sysctl -n hw.ncpu)
 
 # Install Python package (editable mode)
-pip install -e .
+uv pip install -e .
 ```
 
 ### Rebuilding After Changes
@@ -62,10 +62,10 @@ pip install genepie
 
 | File | Purpose |
 |------|---------|
-| `pyproject.toml` | Package metadata, dependencies, CLI entry points |
+| `pyproject.toml` | Package metadata, dependencies, CLI entry points, package-data (test data) |
 | `setup.py` | Forces platform-specific wheel (not pure Python) |
 | `src/genepie/cli.py` | CLI entry point functions for all binaries |
-| `MANIFEST.in` | Specifies files to include in source distribution |
+| `MANIFEST.in` | Specifies files to include in source distribution (including test data) |
 
 ### CLI Commands Available After Installation
 
@@ -351,7 +351,7 @@ except GenesisError as e:
 
 ```
 src/genepie/tests/
-├── data/                          # Test data (centralized)
+├── data/                          # Test data (included in PyPI package)
 │   ├── bpti/                      # BPTI test system
 │   │   ├── BPTI_ionize.pdb
 │   │   ├── BPTI_ionize.psf
@@ -371,7 +371,15 @@ src/genepie/tests/
 ├── test_integration.py            # Comprehensive integration tests (42 tests)
 ├── test_*.py                      # Individual analysis tests
 └── all_run.sh                     # Test runner script
+
+tests/regression_test/             # Reference data for regression tests (source repo only)
+└── test_analysis/                 # Expected output values
 ```
+
+**Test Categories:**
+- **Basic tests** (test_rmsd, test_rg, etc.): Validate output ranges, work with PyPI package
+- **Regression tests** (test_trj, test_wham, test_mbar_*, test_atdyn): Compare against reference values, require source repo
+- **Integration tests** (test_integration): Comprehensive tests, require chignolin download
 
 ### Running Tests
 
@@ -380,18 +388,26 @@ src/genepie/tests/
 make
 
 # Install genepie in editable mode (if not already done)
-pip install -e .
+uv pip install -e .
 
-# Run all analysis tests (18 tests)
+# Run individual tests (basic validation)
+python -m genepie.tests.test_rmsd
+python -m genepie.tests.test_crd_convert
+python -m genepie.tests.test_rg
+
+# Run all basic tests (18 tests)
 cd src/genepie/tests
 ./all_run.sh
 
-# Run individual tests
-python -m genepie.tests.test_rmsd
+# Regression tests (compare with reference values in tests/regression_test/)
 python -m genepie.tests.test_trj
+python -m genepie.tests.test_wham
 python -m genepie.tests.test_mbar_1d
-# etc.
+python -m genepie.tests.test_mbar_block
+python -m genepie.tests.test_atdyn
 ```
+
+**Note**: Basic tests (test_rmsd, test_rg, etc.) validate output ranges only. Regression tests compare against reference values and require the full source repository.
 
 ### Integration Tests
 
