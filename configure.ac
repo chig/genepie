@@ -1439,6 +1439,19 @@ CFLAGS+=" -fPIC"
 ## Python interface
 AM_PATH_PYTHON([3.9])
 
+# LIBS
+if test x"${FC_ACT}" = x"gfortran"; then
+  case "$host_os" in
+    linux*)
+      AC_CHECK_LIB([mvec], [sincos],
+        [LIBS="$LIBS -lmvec"
+         AC_MSG_NOTICE([libmvec found, linking with -lmvec])],
+        [AC_MSG_NOTICE([libmvec not found, not linking -lmvec])])
+      LIBS="$LIBS -lm"
+  esac
+fi
+
+
 # LDFLAGS
 if test -z "${LDFLAGS}"; then
   if test x"${FC_ACT}" = x"ifort" -o x"${FC_ACT}" = x"ifx"; then
