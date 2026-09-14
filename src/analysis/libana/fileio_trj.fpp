@@ -37,6 +37,7 @@ module fileio_trj_mod
   private :: open_pdb_trj
   private :: close_pdb_trj
   private :: read_pdb_trj
+  private :: get_num_steps_pdb_trj
   private :: write_pdb_trj_sel
   private :: write_pdb_trj
 
@@ -2003,12 +2004,15 @@ contains
 
     select case(trj_format)
 
-    ! currently, only dcd format is supported
     case (TrjFormatDCD)
 
       call open_trj(file, filename, trj_format, trj_type, IOFileInput)
       call read_dcd_trj_header(file, num_steps=num_steps)
       call close_trj(file)
+
+    case (TrjFormatPDB)
+
+      num_steps = get_num_steps_pdb_trj(filename)
 
     case default
 
@@ -2021,5 +2025,70 @@ contains
     return
 
   end function get_num_steps_trj
+
+  !======1=========2=========3=========4=========5=========6=========7=========8
+  !
+  !  Function      get_num_steps_pdb_trj
+  !> @brief        count the frames stored in a PDB trajectory file
+  !! @authors      Claude Code
+  !! @param[in]    filename : PDB file name
+  !! @return       number of frames
+  !! @note         frames are delimited by ENDMDL records (as written by
+  !!               write_pdb_trj); a file without ENDMDL is treated as a
+  !!               concatenation of END-terminated structures, and a bare
+  !!               list of ATOM/HETATM records counts as one frame
+  !
+  !======1=========2=========3=========4=========5=========6=========7=========8
+
+  function get_num_steps_pdb_trj(filename) result(num_steps)
+
+    ! formal arguments
+    character(*),            intent(in)    :: filename
+
+    ! return value
+    integer                                :: num_steps
+
+    ! local variables
+    integer                  :: unit, num_endmdl, num_end, num_atom
+    character(6)             :: line
+
+
+    num_endmdl = 0
+    num_end    = 0
+    num_atom   = 0
+
+    call open_file(unit, filename, IOFileInput)
+
+    do while (.true.)
+
+      read(unit, '(a6)', end=100, err=900) line
+
+      if (line == 'ENDMDL') then
+        num_endmdl = num_endmdl + 1
+      else if (line(1:3) == 'END') then
+        num_end = num_end + 1
+      else if (line(1:4) == 'ATOM' .or. line(1:4) == 'HETA') then
+        num_atom = num_atom + 1
+      end if
+
+    end do
+
+100 call close_file(unit)
+
+    if (num_endmdl > 0) then
+      num_steps = num_endmdl
+    else if (num_end > 0) then
+      num_steps = num_end
+    else if (num_atom > 0) then
+      num_steps = 1
+    else
+      num_steps = 0
+    end if
+
+    return
+
+900 call error_msg('Get_Num_Steps_Pdb_Trj> read error: ' // trim(filename))
+
+  end function get_num_steps_pdb_trj
 
 end module fileio_trj_mod
