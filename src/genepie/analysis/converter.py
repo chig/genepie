@@ -66,8 +66,9 @@ def crd_convert_info(
         GenesisFortranError: If Fortran returns an error
 
     Note:
-        Frame count auto-detection only works for DCD format. For other formats,
-        frame counts are estimated and may not be exact.
+        Frame counts are auto-detected for DCD (from the header) and PDB
+        (frames delimited by ENDMDL, or END, records; a bare list of ATOM
+        records counts as one frame). Other formats are not supported yet.
     """
     lib = LibGenesis().lib
     mol_c = molecule.to_SMoleculeC()
@@ -209,8 +210,10 @@ def crd_convert(
     Args:
         molecule: SMolecule object containing molecular structure
         trj_files: List of trajectory file paths
-        trj_format: Trajectory format ("DCD", "AMBER", "PDB", "GROMACS", etc.)
-        trj_type: Trajectory type ("COOR" or "COOR+BOX")
+        trj_format: Trajectory format ("DCD" or "PDB"; other formats cannot
+                    auto-detect their frame count yet)
+        trj_type: Trajectory type ("COOR" or "COOR+BOX"). For PDB input the
+                  box is taken from the CRYST1 record.
         selection: Atom selection string (e.g., "all", "an:CA", "rno:1-10")
         fitting_selection: Selection for fitting atoms (None for no fitting)
         fitting_method: Fitting method ("NO", "TR+ROT", "TR", "TR+ZROT", etc.)
@@ -247,6 +250,9 @@ def crd_convert(
         ...                          rename_res=["HSE HIS", "HSD HIS"])
         >>> # Lazy mode: no data loading, analysis reads from file
         >>> lazy_trajs, mol = crd_convert(mol, ["traj.dcd"], lazy=True)
+        >>> # A single PDB structure becomes a one-frame trajectory
+        >>> trajs, mol = crd_convert(mol, ["model.pdb"], trj_format="PDB",
+        ...                          trj_type="COOR")
     """
     lib = LibGenesis().lib
 
@@ -401,11 +407,10 @@ def crd_convert(
         # Allocate as Fortran-contiguous (3, n_selected, n_frames)
         coords = np.zeros((3, n_selected, n_frames), dtype=np.float64, order='F')
         coords_list.append(coords)
-        if trj_type_c == TrjType.COOR_BOX:
-            # PBC box: (3, 3, n_frames) in Fortran order
-            pbc_box = np.zeros((3, 3, n_frames), dtype=np.float64, order='F')
-        else:
-            pbc_box = np.zeros((0, 0, 0), dtype=np.float64, order='F')
+        # PBC box: (3, 3, n_frames) in Fortran order. Fortran writes the box
+        # of every frame unconditionally, so the buffer is allocated even for
+        # trj_type="COOR"; it is simply discarded below in that case.
+        pbc_box = np.zeros((3, 3, n_frames), dtype=np.float64, order='F')
         pbc_box_list.append(pbc_box)
 
     # Create array of pointers for Fortran
@@ -413,7 +418,7 @@ def crd_convert(
     pbc_box_ptrs = (ctypes.c_void_p * n_trajs)()
     for i in range(n_trajs):
         coords_ptrs[i] = coords_list[i].ctypes.data
-        pbc_box_ptrs[i] = pbc_box_list[i].ctypes.data if pbc_box_list[i].size > 0 else None
+        pbc_box_ptrs[i] = pbc_box_list[i].ctypes.data
 
     # Pack filenames and prepare data for Fortran call
     packed_names, n_files, max_len = _pack_filenames(trj_files)
@@ -468,7 +473,7 @@ def crd_convert(
             coords_py = np.ascontiguousarray(
                 np.transpose(coords_list[i], (2, 1, 0))
             )
-            if trj_type_c == TrjType.COOR_BOX and pbc_box_list[i].size > 0:
+            if trj_type_c == TrjType.COOR_BOX:
                 # Transpose pbc_box: (3, 3, n_frame) -> (n_frame, 3)
                 # Extract diagonal (box dimensions)
                 pbc_box_py = np.ascontiguousarray(
